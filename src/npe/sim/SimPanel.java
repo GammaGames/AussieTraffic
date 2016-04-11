@@ -64,6 +64,7 @@ public class SimPanel extends JPanel implements Runnable {
 	private double ty = 0;
 	//Scaling Control
 	/**The horizontal scaling factor.*/
+	//Change this number to negative for mirrior, make it toggable
 	private double sx = 1.0;
 	/**The vertical scaling factor.*/
 	private double sy = 1.0;
