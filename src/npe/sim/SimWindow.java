@@ -52,12 +52,12 @@ public class SimWindow extends JFrame {
 		
 		//Initialise variables
 		simProperties = new SimProperties();
-		tGeneral = new GeneralTab(simProperties);
 		tLights = new TrafficLightTab(this, simProperties);
 		tSequence = new SequenceTab(this, simProperties);
 		pTabs = new JTabbedPane();
 		pBot = new BottomPanel(this, simProperties);
 		pSim = new SimPanel(this, simProperties);
+		tGeneral = new GeneralTab(pSim, simProperties);
 		
 		//Set up tabs
 		pTabs.add("General", tGeneral);

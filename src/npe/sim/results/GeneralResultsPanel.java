@@ -2,6 +2,7 @@ package npe.sim.results;
 import java.awt.Font;
 import java.awt.Graphics;
 import javax.swing.*;
+import npe.sim.SimProperties;
 
 /**
  * A panel for displaying general simulation results as numerical summaries.
@@ -27,16 +28,24 @@ public class GeneralResultsPanel extends JPanel {
 	private double lineNumber = 0;
 	private String startTime;
 	private double totalRun;
+	private String west = "West";
+	private String east = "East";
 	//////////////////
 	//---CREATION---//
 	//////////////////
 	/**Creates a new general results panel.*/
-	public GeneralResultsPanel(StatsCollector sc)
+	public GeneralResultsPanel(StatsCollector sc, SimProperties sp)
 	{
 		//Get the stats
 		overallData = sc.overallStats();
 		startTime = sc.getStartTime();
 		totalRun = sc.getTotalRunTime();
+		//Check is USmode is active  
+        	if (sp.USmode == true)
+        	{
+        		west = "East";
+        		east = "West";
+        	}
 		//Set up the panel
 		setLayout(null);
 		//Display the stats
@@ -111,12 +120,12 @@ public class GeneralResultsPanel extends JPanel {
 		
 		// From East and West headers
 		lineNumber -= 5.5;
-		JLabel fw = new JLabel("From West");
+		JLabel fw = new JLabel(String.format("From %s", west));
 		fw.setBounds(TOP_LEFT_X, TOP_LEFT_Y + (int)(lineNumber*NEXT_LINE_HEIGHT), 200, 30);
 		fw.setFont(header2);
 		this.add(fw);
 		
-		JLabel fe = new JLabel("From East");
+		JLabel fe = new JLabel(String.format("From %s", east));
 		fe.setBounds(TOP_LEFT_X + COLUMN_2_X, TOP_LEFT_Y + (int)(lineNumber*NEXT_LINE_HEIGHT), 200, 30);
 		fe.setFont(header2);
 		this.add(fe);

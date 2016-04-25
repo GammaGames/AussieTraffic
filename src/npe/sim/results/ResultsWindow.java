@@ -38,7 +38,7 @@ public class ResultsWindow extends JFrame implements ComponentListener {
 	 * @param x The x-coordinate of the position to create the window.
 	 * @param y The y-coordinate of the position to create the window.
 	 */
-	public ResultsWindow(int x, int y, StatsCollector st)
+	public ResultsWindow(int x, int y, StatsCollector st, SimProperties sp)
 	{
 		//Set up the window
 		super(title);
@@ -52,11 +52,11 @@ public class ResultsWindow extends JFrame implements ComponentListener {
 		this.addComponentListener(this);
 		
 		//Initialise variables
-		tab0 = new GeneralResultsPanel(statsCollector);
-		tab1 = new ResultsPanel(statsCollector, GraphType.ARRIVAL);
-		tab2 = new ResultsPanel(statsCollector, GraphType.MAX_QUEUE_TIME);
-		tab3 = new ResultsPanel(statsCollector, GraphType.AVG_QUEUE_TIME);
-		tab4 = new ResultsPanel(statsCollector, GraphType.TOTAL_TIME);
+		tab0 = new GeneralResultsPanel(statsCollector, sp);
+		tab1 = new ResultsPanel(statsCollector, GraphType.ARRIVAL, sp);
+		tab2 = new ResultsPanel(statsCollector, GraphType.MAX_QUEUE_TIME, sp);
+		tab3 = new ResultsPanel(statsCollector, GraphType.AVG_QUEUE_TIME, sp);
+		tab4 = new ResultsPanel(statsCollector, GraphType.TOTAL_TIME, sp);
 		
 		pTabs = new JTabbedPane();
 		
