@@ -2,7 +2,7 @@ package npe.sim.results;
 import java.awt.Font;
 import java.awt.Graphics;
 import javax.swing.*;
-import npe.sim.SimProperties;
+import npe.sim.Utils;
 
 /**
  * A panel for displaying general simulation results as numerical summaries.
@@ -34,14 +34,14 @@ public class GeneralResultsPanel extends JPanel {
 	//---CREATION---//
 	//////////////////
 	/**Creates a new general results panel.*/
-	public GeneralResultsPanel(StatsCollector sc, SimProperties sp)
+	public GeneralResultsPanel(StatsCollector sc)
 	{
 		//Get the stats
 		overallData = sc.overallStats();
 		startTime = sc.getStartTime();
 		totalRun = sc.getTotalRunTime();
 		//Check is USmode is active  
-        	if (sp.USmode == true)
+        	if (Utils.getUSmode() == true)
         	{
         		west = "East";
         		east = "West";
