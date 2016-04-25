@@ -12,6 +12,8 @@ public class SimProperties {
 	///////////////////
 	//---VARIABLES---//
 	///////////////////
+	/**The variable to enable the US mode.*/
+    	public boolean USmode = false;
 	/**The speed limit for vehicles, in km/h.*/
 	public int speedLimit = 50;
 	/**The time of day for the simulation to run (traffic model is selected based on this).*/
