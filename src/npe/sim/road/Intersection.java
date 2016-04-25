@@ -252,7 +252,7 @@ public class Intersection {
 		}
 		
 		//Draw the two road signs
-		if (simProperties.USmode == true) {
+		if (Utils.getUSmode() == true) {
 		    g.scale(-1.0, 1.0);
 		    signNorth.draw(g, -NorthSignX - 530, -NorthSignY + 570);
 		    signFrome.draw(g, -FromeSignX - 25, -FromeSignY + 40);
