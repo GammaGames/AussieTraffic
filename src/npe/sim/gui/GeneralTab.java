@@ -6,6 +6,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import npe.sim.SimProperties;
 import npe.sim.road.VehicleLane;
+import npe.sim.SimPanel;
 
 /**
  * The General tab of the GUI, which contains options for the simulation such as time of day.
@@ -18,7 +19,9 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	///////////////////
 	/**The simulation properties which can be changed by this tab.*/
 	private SimProperties sp;
+	private SimPanel pSim;
 	//GUI Components
+	private JCheckBox bUSmode;
 	private JLabel lTime;
 	private JLabel lSpeed;
 	private JComboBox bTime;
@@ -34,13 +37,20 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	/**Creates a new GeneralTab.
 	 * @param sp The simulation properties which this tab can change.
 	 */
-	public GeneralTab(SimProperties sp)
+	public GeneralTab(SimPanel Panel, SimProperties sp)
 	{
+		this.pSim = Panel;
 		this.sp = sp;
 		
 		setLayout(null);
 		
 		//---ADD ELEMENTS TO PANEL---//
+				
+		//Add USmode check box
+        	bUSmode = new JCheckBox("US mode");
+        	bUSmode.setBounds(150, 11, 100, 14);
+        	bUSmode.addChangeListener(this);
+        	add(bUSmode);
 		
 		//Time of day label
 		lTime = new JLabel("Time of Day:");
@@ -61,24 +71,25 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		
 		//Speed limit slider
 		bSpeed = new JSlider();
+		bSpeed.setMinorTickSpacing(1);
 		bSpeed.setMajorTickSpacing(5);
 		bSpeed.setSnapToTicks(true);
 		bSpeed.setPaintLabels(true);
 		bSpeed.setPaintTicks(true);
 		bSpeed.setMinimum(40);
-		bSpeed.setMaximum(60);
+		bSpeed.setMaximum(65);
 		bSpeed.setBounds(10, 97, 225, 49);
 		bSpeed.addChangeListener(this);
 		add(bSpeed);	
 		
-		//Add Lane North Tce check box
-		bAddLaneNorth = new JCheckBox("Add lane to North Tce");
+		//Add Lane North/South check box
+		bAddLaneNorth = new JCheckBox("Add lane to West/East");
 		bAddLaneNorth.setBounds(10, 170, 200, 30);
 		bAddLaneNorth.addChangeListener(this);
 		add(bAddLaneNorth);
 
 		//Add Lane Frome rd check box
-		bAddLaneFrome = new JCheckBox("Add lane to Frome Rd");
+		bAddLaneFrome = new JCheckBox("Add lane to North/South");
 		bAddLaneFrome.setBounds(10, 200, 200, 30);
 		bAddLaneFrome.addChangeListener(this);
 		add(bAddLaneFrome);
@@ -113,7 +124,36 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	{
 		Object src = e.getSource();
 		if (src == bSpeed) {
-			sp.speedLimit = bSpeed.getValue();
+			if (bUSmode.isSelected() == true) {
+		        	sp.speedLimit = (int)(bSpeed.getValue()/0.621371);
+			}
+			else {
+		        	sp.speedLimit = bSpeed.getValue();
+			}
+		}
+		
+		// If US mode is active, change the GUI for the user.
+		if (src == bUSmode) {
+		    sp.USmode = bUSmode.isSelected();
+		    if (bUSmode.isSelected()) {
+		        lSpeed.setText("Vehicle Speed Limit (m/h):");
+		        bLeftOnly.setText("Right only Lanes");
+		        bSpeed.setMajorTickSpacing(3);
+	            bSpeed.setPaintLabels(true);
+	            bSpeed.setPaintTicks(true);
+		        bSpeed.setMinimum(25);
+		        bSpeed.setMaximum(40);
+		    }
+		    else {
+		        lSpeed.setText("Vehicle Speed Limit (km/h):");
+		        bLeftOnly.setText("Left only lanes");
+		        bSpeed.setMajorTickSpacing(5);
+		        bSpeed.setPaintLabels(true);
+		        bSpeed.setPaintTicks(true);
+		        bSpeed.setMinimum(40);
+		        bSpeed.setMaximum(65);
+		    }
+		    pSim.repaint();
 		}
 		
 		if (src == bAddLaneNorth) {
@@ -153,6 +193,7 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	 */
 	public void setEnabled(boolean enabled)
 	{
+		bUSmode.setEnabled(enabled);
 		bTime.setEnabled(enabled);
 		bSpeed.setEnabled(enabled);
 		bAddLaneNorth.setEnabled(enabled);
