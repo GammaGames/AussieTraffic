@@ -40,6 +40,7 @@ public class Intersection {
 	private double speedLimit;
 	
 	private TrafficLightController trafficLightController;
+	private SimProperties simProperties;
 	
 	//Road sign sprites
 	private Sprite signNorth;
@@ -63,6 +64,7 @@ public class Intersection {
 	/**Constructor just initialises a new Arraylist of Roads*/
 	public Intersection(SimProperties sp, StatsCollector sc)
 	{	
+		this.simProperties = sp;
 		this.trafficLightController = sp.trafficLightController;
 		this.numLanesFrome = sp.numLanesFrome + sp.numLanesFromeExtra ;
 		this.numLanesNorth = sp.numLanesNorth + sp.numLanesNorthExtra;
@@ -250,8 +252,16 @@ public class Intersection {
 		}
 		
 		//Draw the two road signs
-		signNorth.draw(g, NorthSignX, NorthSignY);
-		signFrome.draw(g, FromeSignX, FromeSignY);
+		if (simProperties.USmode == true) {
+		    g.scale(-1.0, 1.0);
+		    signNorth.draw(g, -NorthSignX - 530, -NorthSignY + 570);
+		    signFrome.draw(g, -FromeSignX - 25, -FromeSignY + 40);
+		    g.scale(-1.0, 1.0);
+		}
+		else {
+	        signNorth.draw(g, NorthSignX, NorthSignY);
+	        signFrome.draw(g, FromeSignX, FromeSignY);
+		}
 		
 		//Draw the Taxi Rank
 		if (taxiRankEnabled) {	
