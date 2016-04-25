@@ -64,12 +64,13 @@ public class SimPanel extends JPanel implements Runnable {
 	private double ty = 0;
 	//Scaling Control
 	/**The horizontal scaling factor.*/
+	//Make this a toggle for changing to US.
 	private double sx = 1.0;
 	/**The vertical scaling factor.*/
 	private double sy = 1.0;
 	/**The x-coordinate of the centre of the panel.*/
 	private double centreX = SP_WIDTH/2;
-	/**The x-coordinate of the centre of the panel.*/
+	/**The y-coordinate of the centre of the panel.*/
 	private double centreY = SP_HEIGHT/2;
 	/**The minimum allowed scaling factor.*/
 	private static final double MIN_SCALE = 0.07;
