@@ -107,7 +107,13 @@ public class SimPanel extends JPanel implements Runnable {
 					ty = 0;
 					prevX = 0;
 					prevY = 0;
-					sx = 1.0;
+					if (Utils.getUSmode())
+					{
+						sx = -1.0;
+					}
+					else {
+						sx = 1.0;
+					}
 					sy = 1.0;
 					repaint();
 				}
@@ -219,6 +225,7 @@ public class SimPanel extends JPanel implements Runnable {
 	}
 
 	/**Redraws the panel and changes way everything is drawn.
+	 * currently breaks debugging unfortunately.
 	 * @return none.
 	 */
 	public void USmode () {
@@ -228,7 +235,6 @@ public class SimPanel extends JPanel implements Runnable {
 		else {
 			sx = Math.abs(sx)*-1;
 		}
-		repaint();
 		return;
 	}
 

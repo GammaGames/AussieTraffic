@@ -254,8 +254,12 @@ public class Intersection {
 		//Draw the two road signs
 		if (Utils.getUSmode() == true) {
 		    g.scale(-1.0, 1.0);
-		    signNorth.draw(g, -NorthSignX - 530, -NorthSignY + 570);
-		    signFrome.draw(g, -FromeSignX - 25, -FromeSignY + 40);
+		    signNorth.draw(g, 
+		    	-NorthSignX - 530 - 2*simProperties.numLanesFromeExtra*(int)VehicleLane.LANE_WIDTH,
+		    	-NorthSignY + 570);
+		    signFrome.draw(g, 
+		    	-FromeSignX - 25, 
+		    	-FromeSignY + 40 - 2*simProperties.numLanesNorthExtra*(int)VehicleLane.LANE_WIDTH);
 		    g.scale(-1.0, 1.0);
 		}
 		else {
