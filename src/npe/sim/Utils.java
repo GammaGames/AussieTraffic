@@ -14,8 +14,6 @@ public class Utils {
 	private static Random random;
 	/**The current seed being used by the random generator.*/
 	private static long seed;
-	/**Variable for USmode accessible by the whole program.*/
-	private static boolean USmode;
 	//Generator setup
 	/**Resets the random number generator, without changing the seed.*/
 	public static void resetRandom()
@@ -110,23 +108,6 @@ public class Utils {
 	public static double convertAcceleration(double acc) 
 	{
 		return (acc*PPM)/(SimPanel.TPS*SimPanel.TPS);
-	}
-	
-	/**sets the current state of the USmode.
-	 * @return none.
-	 */
-	public static void setUSmode(boolean toggled)
-	{
-		USmode = toggled;
-		return;
-	}
-	
-	/**returns the mode state.
-	 * @return bool whether USmode is on or not.
-	 */
-	public static boolean getUSmode()
-	{
-		return USmode;
 	}
 	
 	/////////////////////

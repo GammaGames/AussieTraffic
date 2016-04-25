@@ -8,7 +8,7 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.*;
-import npe.sim.Utils;
+import npe.sim.SimProperties;
 
 /**
  * Displays a graph of results based on a particular graph type.
@@ -70,9 +70,9 @@ public class ResultsPanel extends JPanel {
 	//---CREATION---//
 	//////////////////
 	/**Creates a new ResultTab.*/
-	public ResultsPanel(StatsCollector st, GraphType g)
+	public ResultsPanel(StatsCollector st, GraphType g, SimProperties sp)
 	{
-	    if (Utils.getUSmode() == true) {
+	    if (sp.USmode == true) {
 	        west = "East";
 	        east = "West";
 	    }

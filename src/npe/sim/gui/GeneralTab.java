@@ -7,7 +7,6 @@ import javax.swing.event.ChangeListener;
 import npe.sim.SimProperties;
 import npe.sim.road.VehicleLane;
 import npe.sim.SimPanel;
-import npe.sim.Utils;
 
 /**
  * The General tab of the GUI, which contains options for the simulation such as time of day.
@@ -135,7 +134,7 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		
 		// If US mode is active, change the GUI for the user.
 		if (src == bUSmode) {
-		     Utils.setUSmode(bUSmode.isSelected());
+		    sp.USmode = bUSmode.isSelected();
 		    if (bUSmode.isSelected()) {
 		        lSpeed.setText("Vehicle Speed Limit (m/h):");
 		        bLeftOnly.setText("Right only Lanes");
@@ -154,7 +153,7 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		        bSpeed.setMinimum(40);
 		        bSpeed.setMaximum(65);
 		    }
-		    pSim.USmode();
+		    pSim.repaint();
 		}
 		
 		if (src == bAddLaneNorth) {
