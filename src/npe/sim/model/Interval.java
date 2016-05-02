@@ -226,6 +226,8 @@ public class Interval {
 		}
 		return ret;
 	}
+	
+	// TODO: UPDATE TO NOT BE WRONG
 
 	/**
 	 * Add all the lanes of a road to an interval

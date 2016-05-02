@@ -214,7 +214,8 @@ public abstract class Vehicle extends Entity {
 			break;
 		case RIGHT:
 			//Exit lane is last element in exitLanes for lane
-			exitLane = currentLane.getExitLanes().get(0);
+			// exitLane = currentLane.getExitLanes().get(0);
+			exitLane = currentLane.getExitLanes().get(currentLane.getExitLanes().size() - 1);
 			
 			endAngle = startAngle + 90;
 			break;

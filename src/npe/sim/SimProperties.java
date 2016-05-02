@@ -22,14 +22,35 @@ public class SimProperties {
 	public Sequence sequence;
 	/**The traffic light controller which contains the selected traffic light durations.*/
 	public TrafficLightController trafficLightController = new TrafficLightController(12);	
+	
 	/**The number of lanes on North Tce.*/
-	public int numLanesNorth  = 4;
-	/**The number of extra lanes on North Tce.*/
+	public int numLanesNorthLeft  = 0;
+	/**The number of lanes on North Tce.*/
+	public int numLanesNorthStraightLeft  = 1;
+	/**The number of lanes on North Tce.*/
+	public int numLanesNorthStraight = 3;
+	/**The number of lanes on North Tce.*/
+	public int numLanesNorthStraightRight  = 0;
+	/**The number of lanes on North Tce.*/
+	public int numLanesNorthRight = 1;
+	
+	/**The number of extra lanes on North Tce. TODO: REMOVE THIS USELESS VALUE*/
 	public int numLanesNorthExtra = 0;
-	/**The number of lanes on Frome Rd.*/
-	public int numLanesFrome  = 3;
+	
+	/**The number of lanes on North Tce.*/
+	public int numLanesFromeLeft  = 0;
+	/**The number of lanes on North Tce.*/
+	public int numLanesFromeStraightLeft  = 1;
+	/**The number of lanes on North Tce.*/
+	public int numLanesFromeStraight = 2;
+	/**The number of lanes on North Tce.*/
+	public int numLanesFromeStraightRight  = 0;
+	/**The number of lanes on North Tce.*/
+	public int numLanesFromeRight = 1;
+	
 	/**The number of extra lanes on North Tce.*/
 	public int numLanesFromeExtra = 0;
+	
 	/**The variable to enable the taxi rank.*/
 	public boolean taxiRank = false;
 	/**The variable .*/

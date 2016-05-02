@@ -49,7 +49,7 @@ public class Road {
 	private double width = 0;
 	private double length = 0;
 	private int numLanes = 0;
-
+	
 	private PedestrianLane left;
 	private PedestrianLane right;
 	private PedestrianLane botRight;
@@ -101,8 +101,12 @@ public class Road {
 			rightSide = new Rectangle2D.Double(x + length + intersection.getWidth() + PedestrianLane.LANE_WIDTH*2, y, length, roadWidth);
 			topRoadSeparator = new Line2D.Double(x, y, x + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getWidth(), y);
 			botRoadSeparator= new Line2D.Double(x, y + roadWidth, x + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getWidth(), y + roadWidth);
-			leftSeparator = new Line2D.Double(x, y + (numLanes/2 + 1)*VehicleLane.LANE_WIDTH, x + length, y + (numLanes/2 + 1)*VehicleLane.LANE_WIDTH);
-			rightSeparator= new Line2D.Double(x + length + intersection.getWidth() + PedestrianLane.LANE_WIDTH*2, y + (numLanes/2)*VehicleLane.LANE_WIDTH, x + length + length + intersection.getWidth() + PedestrianLane.LANE_WIDTH*2, y + (numLanes/2)*VehicleLane.LANE_WIDTH);
+
+			leftSeparator = new Line2D.Double(x, y + (numLanes - 4) * VehicleLane.LANE_WIDTH,
+					x + length, y + (numLanes - 4) * VehicleLane.LANE_WIDTH);
+			
+			rightSeparator= new Line2D.Double(x + length + intersection.getWidth() + PedestrianLane.LANE_WIDTH*2, y + 4 * VehicleLane.LANE_WIDTH,
+					x + length + length + intersection.getWidth() + PedestrianLane.LANE_WIDTH*2, y + 4 * VehicleLane.LANE_WIDTH);
 		}
 
 		if(ROAD == Road.Type.FROME) {
@@ -122,10 +126,16 @@ public class Road {
 			//Set the graphics components
 			leftSide = new Rectangle2D.Double(x - roadWidth, y, roadWidth, length);	
 			rightSide = new Rectangle2D.Double(x - roadWidth, y + length + intersection.getHeight() + PedestrianLane.LANE_WIDTH*2, roadWidth, length);	
-			topRoadSeparator = new Line2D.Double(x, y, x, y + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getHeight());
-			botRoadSeparator= new Line2D.Double(x - roadWidth, y, x - roadWidth, y + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getHeight());
-			leftSeparator = new Line2D.Double(x - (numLanes/2 + 1)*VehicleLane.LANE_WIDTH, y, x - (numLanes/2 + 1)*VehicleLane.LANE_WIDTH, y + length);
-			rightSeparator= new Line2D.Double(x - (numLanes/2)*VehicleLane.LANE_WIDTH, y + length + intersection.getHeight() + PedestrianLane.LANE_WIDTH*2, x - (numLanes/2)*VehicleLane.LANE_WIDTH, y + length + length + intersection.getHeight() + PedestrianLane.LANE_WIDTH*2);
+			
+			topRoadSeparator = new Line2D.Double(x, y,
+					x, y + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getHeight());
+			botRoadSeparator= new Line2D.Double(x - roadWidth, y,
+					x - roadWidth, y + (length + PedestrianLane.LANE_WIDTH)*2 + intersection.getHeight());
+			
+			leftSeparator = new Line2D.Double(0, 0,
+					x, y + length);
+			rightSeparator= new Line2D.Double(0, 0,
+					0, 0);
 		}
 
 	}
@@ -329,7 +339,6 @@ public class Road {
 		//if we have only 1 straight lane
 		//10 lanes in total
 		//n/2 = 5
-		
 		
 		//let n = number of lanes on the road
 		//for the first n/2 lanes

@@ -58,16 +58,42 @@ public class Intersection {
 	private VehicleLane.Type leftMostLaneType;	
 	/**The Lane type .*/
 	private VehicleLane.Type leftMostLaneTypeOpposite;
+
+	private int fromeExitLaneCount;
+
+	private int northExitLaneCount;
+
+	private int fromeTotalLaneCount;
+
+	private int northTotalLaneCount;
 	
 
 	/**Constructor just initialises a new Arraylist of Roads*/
 	public Intersection(SimProperties sp, StatsCollector sc)
 	{	
 		this.trafficLightController = sp.trafficLightController;
-		this.numLanesFrome = sp.numLanesFrome + sp.numLanesFromeExtra ;
-		this.numLanesNorth = sp.numLanesNorth + sp.numLanesNorthExtra;
-		width = (numLanesFrome * 2 - 1) * VehicleLane.LANE_WIDTH;
-		height = (numLanesNorth * 2 - 1) * VehicleLane.LANE_WIDTH;
+		this.numLanesFrome = sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft
+				+ sp.numLanesFromeStraight + sp.numLanesFromeStraightRight
+				+ sp.numLanesFromeRight;
+		
+		this.numLanesNorth = sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft
+				+ sp.numLanesNorthStraight + sp.numLanesNorthStraightRight
+				+ sp.numLanesNorthRight;
+		
+		int fromeExitLaneCount = Math.max(Math.max(sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft,
+				sp.numLanesNorthRight + sp.numLanesNorthStraightRight),
+				sp.numLanesFromeStraight + sp.numLanesFromeStraightRight + sp.numLanesFromeStraightLeft);
+		
+		int northExitLaneCount = Math.max(Math.max(sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft,
+				sp.numLanesFromeRight + sp.numLanesFromeStraightRight),
+				sp.numLanesNorthStraight + sp.numLanesNorthStraightRight + sp.numLanesNorthStraightLeft);
+		
+		int fromeTotalLaneCount = numLanesNorth + northExitLaneCount;
+		int northTotalLaneCount = numLanesFrome + fromeExitLaneCount;
+		
+		
+		width = fromeTotalLaneCount * VehicleLane.LANE_WIDTH;
+		height = northTotalLaneCount * VehicleLane.LANE_WIDTH;
 		x = SimPanel.SP_WIDTH/2 - width/2;
 		y = SimPanel.SP_HEIGHT/2 - height/2;
 		this.speedLimit = sp.speedLimit;
@@ -77,8 +103,8 @@ public class Intersection {
 		
 		statsCollector = sc;
 		
-		northTce = new Road(Road.Type.NORTH, this, numLanesNorth * 2 - 1, speedLimit);
-		fromeRd = new Road(Road.Type.FROME, this, numLanesFrome * 2 - 1, speedLimit);
+		northTce = new Road(Road.Type.NORTH, this, northTotalLaneCount, speedLimit);
+		fromeRd = new Road(Road.Type.FROME, this, fromeTotalLaneCount, speedLimit);
 
 		//---LOAD THE ROAD SIGN SPRITES---//
 		try {
@@ -96,7 +122,9 @@ public class Intersection {
 		FromeSignY = 20 - sp.numLanesNorthExtra*(int)VehicleLane.LANE_WIDTH;
 		
 		
-		createIntersection();
+		createIntersection(sp);
+		
+		
 
 	}
 	
@@ -351,342 +379,458 @@ public class Intersection {
 		return maxY;
 	}
 	
-	private void createIntersection()
+	private enum Side
+	{
+		NORTH(0),
+		SOUTH(1),
+		EAST(2),
+		WEST(3);
+		
+		int side;
+		Side(int side) {
+			this.side = side;
+		}
+	}
+	
+	/** Creates a lane to be added to the intersection.
+	 * @param laneType LEFT, LEFT_, RIGHT, ETC
+	 * @param laneNumber Starting with the left turn lane as 0, the index of the lane
+	 * @param side The IntersectionSide of the intersection to put the lane. NORTH means the lane
+	 * physically located at the north end.
+	 * @return A lane with the correct type and position set for the lane number given
+	 */
+	public VehicleLane createLane(VehicleLane.Type laneType, int laneNumber, Side side, boolean reverseIndex) {
+		VehicleLane lane = null;
+		double currentOffset = laneNumber * VehicleLane.LANE_WIDTH;
+		double reverseOffsetFrome = (fromeTotalLaneCount - laneNumber - 1) * VehicleLane.LANE_WIDTH;
+		double reverseOffsetNorth = (fromeTotalLaneCount - laneNumber - 1) * VehicleLane.LANE_WIDTH;
+		
+		switch(side) {
+		case NORTH:
+			lane = new VehicleLane(laneType, fromeRd,
+					fromeRd.getX() - (reverseIndex ? reverseOffsetFrome : currentOffset),
+					fromeRd.getY(),
+					90, statsCollector);
+			break;
+			
+		case SOUTH:
+			lane = new VehicleLane(laneType, fromeRd,
+					fromeRd.getX() + (reverseIndex ? reverseOffsetFrome : currentOffset) - VehicleLane.LANE_WIDTH * fromeTotalLaneCount,
+					fromeRd.getY() + fromeRd.getLength() * 2 + height + PedestrianLane.LANE_WIDTH * 2,
+					270, statsCollector);
+			break;
+			
+		case EAST:
+			lane = new VehicleLane(laneType, northTce,
+					northTce.getX() + 2 * northTce.getLength() + width + PedestrianLane.LANE_WIDTH * 2,
+					northTce.getY() - (reverseIndex ? reverseOffsetFrome : currentOffset) + northTotalLaneCount * VehicleLane.LANE_WIDTH,
+					180, statsCollector);
+			break;
+			
+		case WEST:
+			lane = new VehicleLane(laneType, northTce,
+					northTce.getX(),
+					northTce.getY() + (reverseIndex ? reverseOffsetFrome : currentOffset),
+					0, statsCollector);
+			break;
+		}
+		
+		return lane;
+	}
+	
+	private void createIntersection(SimProperties sp)
 	{
 		trafficLightController.addPedestrianLanes(northTce);
 		trafficLightController.addPedestrianLanes(fromeRd);
 		
+		fromeExitLaneCount = Math.max(Math.max(sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft,
+				sp.numLanesNorthRight + sp.numLanesNorthStraightRight),
+				sp.numLanesFromeStraight + sp.numLanesFromeStraightRight + sp.numLanesFromeStraightLeft);
 		
-		//-------EXIT LANE MAP-------//
-		// Map from index to which road it corresponds to
-		// 0 -> North tce east
-		// 1 -> North tce west
-		// 2 -> Frome Road South
-		// 3 -> Frome Road North
-
-		//--------------NOTE------------//
-		//The reason for the map the way it is, is due to the order the exit lanes are created
-		//North Tce west lane is created first, and hence an exit lane is created on it's opposite side
+		northExitLaneCount = Math.max(Math.max(sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft,
+				sp.numLanesFromeRight + sp.numLanesFromeStraightRight),
+				sp.numLanesNorthStraight + sp.numLanesNorthStraightRight + sp.numLanesNorthStraightLeft);
 		
+		fromeTotalLaneCount = numLanesNorth + northExitLaneCount;
+		northTotalLaneCount = numLanesFrome + fromeExitLaneCount;
 		
-		//We also need to keep a record of the entry lanes that will need to map add the exit lanes
-		//------ENTRY LANE MAP-----//
-		//-------LEFT Turns-------//
-		// 0 -> Frome Road North
-		// 1 -> From Road South
-		// 2 -> North Tce East
-		// 3 -> North Tce West
-		
-		//--------RIGHT TURNS------//
-		// 0 -> From Road South
-		// 1 -> From Road North
-		// 2 -> North Tce West
-		// 3 -> North Tce East
-
-		
-		//Add lanes to intersection
-		VehicleLane entryLane;
-		VehicleLane exitLane;
-		double currentWidth = 0;
-		
-		//create four left most lanes, these will be used for the exit lanes of left turns
-		VehicleLane[] leftExit = new VehicleLane[4];
-		//likewise creating for rightmost lanes used for right turns
-		VehicleLane[] rightExit = new VehicleLane[4];
-		
-		//create the four lanes that will be turning right and left as well
-		VehicleLane[] rightEntry = new VehicleLane[4];
-		VehicleLane[] leftEntry = new VehicleLane[4];
-		
-		//-------EXIT LANE MAP-------//
-		// Map from index to which road it corresponds to
-		// 0 -> North tce east
-		// 1 -> North tce west
-		// 2 -> Frome Road South
-		// 3 -> Frome Road North
-
-		//--------------NOTE------------//
-		//The reason for the map the way it is, is due to the order the exit lanes are created
-		//North Tce west lane is created first, and hence an exit lane is created on it's opposite side
-		
-		
-		//We also need to keep a record of the entry lanes that will need to map add the exit lanes
-		//------ENTRY LANE MAP-----//
-		//-------LEFT Turns-------//
-		// 0 -> Frome Road North
-		// 1 -> From Road South
-		// 2 -> North Tce East
-		// 3 -> North Tce West
-		
-		//--------RIGHT TURNS------//
-		// 0 -> From Road South
-		// 1 -> From Road North
-		// 2 -> North Tce West
-		// 3 -> North Tce East
-		
-		int MAP_NTE = 0;
-		int MAP_NTW = 1;
-		int MAP_FRS = 2;
-		int MAP_FRN = 3;
-		
-		int LEFT_FRS = 0;
-		int LEFT_FRN = 1;
-		int LEFT_NTW = 2;
-		int LEFT_NTE = 3;
-		
-		int RIGHT_FRN = 0;
-		int RIGHT_FRS = 1;
-		int RIGHT_NTE = 2;
-		int RIGHT_NTW = 3;
-		
-		//--------RIGHT BOX MAP----------//
-		// 
-		
-		int tlID = 0; // the current trafficLight id that we are seeting coords for
-		
-		//Boxes that we need to add lanes to
-		Box[] boxes = new Box[4];
-		for( int i = 0 ; i < boxes.length ; i++ ){
-			boxes[i] = new Box();
-		}
-		
-		
-		//-------------------NORTH TERRACE WEST LEFT LANE----------------//
-		//Add LEFT_STRAIGHT lane
-		entryLane = new VehicleLane(leftMostLaneType, northTce, northTce.getX(), northTce.getY() + currentWidth, 0, statsCollector);
-		exitLane = new VehicleLane(leftMostLaneTypeOpposite, northTce, northTce.getX() + northTce.getLength()*2 + width + PedestrianLane.LANE_WIDTH*2, northTce.getY() + currentWidth + VehicleLane.LANE_WIDTH, 180, statsCollector);
-		northTce.addLane(entryLane);
-		trafficLightController.addLane(entryLane);
-		northTce.addLane(exitLane);
-		entryLane.addExitLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-
-		//store the left most exit lanes
-		leftExit[MAP_NTE] = exitLane;
-		//store the left turning lane as well
-		leftEntry[LEFT_NTW] = entryLane;
-		
-		//set the x and y coordinates of the traffic light that will correpond to the left lanes
-		setTrafficLightCoords(tlID++,entryLane);
-		
-		//---------------NORTH TERRACE WEST STRAIGHT LANES-----------//
-		//Loop to create the straight lanes
-		int numLanes = (numLanesNorth- 2);
-		for (int i = 0; i < numLanes; i++) {
-			entryLane = new VehicleLane(VehicleLane.Type.STRAIGHT, northTce, northTce.getX(), northTce.getY() + currentWidth, 0, statsCollector);
-			exitLane = new VehicleLane(VehicleLane.Type.STRAIGHT_, northTce, northTce.getX() + northTce.getLength()*2 + width + PedestrianLane.LANE_WIDTH*2, northTce.getY() + currentWidth + VehicleLane.LANE_WIDTH, 180, statsCollector);
-			northTce.addLane(entryLane);
-			trafficLightController.addLane(entryLane);
-			northTce.addLane(exitLane);
-			entryLane.addExitLane(exitLane);
-			currentWidth += VehicleLane.LANE_WIDTH;
-
-			//rightmost exit lane is the last straight lane
-			if ( i == (numLanes - 1)){
-				rightExit[MAP_NTE] = exitLane;
-			}
+		// TODO: FROME
+		// LEFT TURN LANES ON FROME
+		for (int i = 0; i < sp.numLanesFromeLeft; i++) {
+			// TOP
+			VehicleLane topLane = createLane(VehicleLane.Type.LEFT, i, Side.NORTH, false);
+			VehicleLane topExitLane = createLane(VehicleLane.Type.LEFT_,
+					i, Side.EAST, true);
 			
-			//we want to set the traffic light coordinates in the middle of the straight lanes.
-			if( i == numLanes/2){
-				setTrafficLightCoords(1,entryLane,(numLanes % 2 == 0));
-			}
+			fromeRd.addLane(topLane); // Add entry to frome
+			northTce.addLane(topExitLane); // Add exit to north tce
+			topLane.addExitLane(topExitLane); // Add exit to entry lane
 			
-			//add the straight lanes to the box
-
-		}
-		
-		//-----------NORTH TERRACE RIGHT TURN LANES EAST AND WEST---------//
-		//Add Right lanes
-		entryLane = new VehicleLane(VehicleLane.Type.RIGHT, northTce, northTce.getX(), northTce.getY() + currentWidth, 0, statsCollector);
-		exitLane = new VehicleLane(VehicleLane.Type.RIGHT, northTce, northTce.getX() + northTce.getLength()*2 + width + PedestrianLane.LANE_WIDTH*2, northTce.getY() + currentWidth + VehicleLane.LANE_WIDTH, 180, statsCollector);
-		northTce.addLane(entryLane);
-		trafficLightController.addLane(entryLane);
-		northTce.addLane(exitLane);
-		trafficLightController.addLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-
-		setTrafficLightCoords(2,entryLane);
-		setTrafficLightCoords(5,exitLane);
-		//remember the right turning lane for later
-		rightEntry[RIGHT_NTW] = entryLane;
-		rightEntry[RIGHT_NTE] = exitLane;
-		
-		//--------------NORTH TERRACE EASTERN STRAIGHT LANES----------//
-		//Loop to create the straight_ lanes
-		for (int i = 0; i < numLanes; i++) {
-			entryLane = new VehicleLane(VehicleLane.Type.STRAIGHT_, northTce, northTce.getX(), northTce.getY() + currentWidth, 0, statsCollector);
-			exitLane = new VehicleLane(VehicleLane.Type.STRAIGHT, northTce, northTce.getX() + northTce.getLength()*2 + width + PedestrianLane.LANE_WIDTH*2, northTce.getY() + currentWidth  + VehicleLane.LANE_WIDTH, 180, statsCollector);
-			northTce.addLane(entryLane);
-			northTce.addLane(exitLane);
-			exitLane.addExitLane(entryLane);
-			trafficLightController.addLane(exitLane);
-			currentWidth += VehicleLane.LANE_WIDTH;
+			trafficLightController.addLane(topLane); // Add entry lane to traffic lights
+			setTrafficLightCoords(6, topLane); // Set traffic light #6 to be positioned near this lane
 			
-			//rightmost exit lane is the first straight lane when on the opposite side of the road
-			if ( i == 0){
-				rightExit[MAP_NTW] = entryLane;
-			}
+			// BOTTOM
+			VehicleLane bottomLane = createLane(VehicleLane.Type.LEFT,
+					i, Side.SOUTH, false);
+			VehicleLane bottomExitLane = createLane(VehicleLane.Type.LEFT_,
+					i, Side.WEST, true);
 			
-			if( i == numLanes/2 ) {
-				setTrafficLightCoords(4,exitLane, (numLanes % 2 == 0));
-			}
-
-		}
-		
-		//-----------NORTH TERRACE EASTERN LEFT LANE---------//////
-		//Add LEFT_STRAIGHT_ lane
-		entryLane = new VehicleLane(leftMostLaneTypeOpposite, northTce, northTce.getX(), northTce.getY() + currentWidth, 0, statsCollector);
-		exitLane = new VehicleLane(leftMostLaneType, northTce, northTce.getX() + northTce.getLength()*2 + width + PedestrianLane.LANE_WIDTH*2, northTce.getY() + currentWidth + VehicleLane.LANE_WIDTH, 180, statsCollector);
-		northTce.addLane(entryLane);
-		northTce.addLane(exitLane);
-		exitLane.addExitLane(entryLane);
-		trafficLightController.addLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-		//this will be the leftmost lane		//Add the lanes to North Terrace:
-		leftExit[MAP_NTW] = entryLane;
-		//add the leftmost entry lane as well
-		leftEntry[LEFT_NTE] = exitLane;
-		
-		setTrafficLightCoords(3,exitLane);
-
-		
-		//Add the lanes to Frome Road:
-		currentWidth = 0;
-		
-		//---------------FROME ROAD NORTH LEFT LANE--------------//
-		//Add LEFT_STRAIGHT lane		trafficLightController.setTrafficLightCoords(0, (int)(entryLane.getExitX() + PedestrianLane.LANE_WIDTH),(int)entryLane.getExitY());
-
-		entryLane = new VehicleLane(leftMostLaneType, fromeRd, fromeRd.getX() - currentWidth, fromeRd.getY(), 90, statsCollector);
-		exitLane = new VehicleLane(leftMostLaneTypeOpposite, fromeRd, fromeRd.getX() - currentWidth - VehicleLane.LANE_WIDTH, fromeRd.getY() + fromeRd.getLength()*2 + height + PedestrianLane.LANE_WIDTH*2, 270, statsCollector);
-		fromeRd.addLane(entryLane);//			System.out.println("Left entry exit pos: " + leftEntry[i].getExitX() + "," + leftEntry[i].getExitY() + "Left Lane dir " + leftEntry[i].direction() +  " Left exit entry post: " + leftLanes[i].getEntryX() + "," + leftLanes[i].getExitY() + " Exit DIRECTION" + leftLanes[i].direction()); 
-		trafficLightController.addLane(entryLane);
-		fromeRd.addLane(exitLane);
-		entryLane.addExitLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-
-		setTrafficLightCoords(6,entryLane);
-		//this is the leftmost lane of FROME ROaAD		trafficLightController.setTrafficLightCoords(0, (int)(entryLane.getExitX() + PedestrianLane.LANE_WIDTH),(int)entryLane.getExitY());
-
-		leftExit[MAP_FRN] = exitLane;
-		leftEntry[LEFT_FRS] = entryLane;
-		
-		//-------------FROME ROAD NORTH STRAIGHT LANES---------------//
-		//Loop to create the straight lanes
-		numLanes = (numLanesFrome - 2);
-		for (int i = 0; i < numLanes; i++) {
-			entryLane = new VehicleLane(VehicleLane.Type.STRAIGHT, fromeRd, fromeRd.getX() - currentWidth, fromeRd.getY(), 90, statsCollector);
-			exitLane = new VehicleLane(VehicleLane.Type.STRAIGHT_, fromeRd, fromeRd.getX() - currentWidth - VehicleLane.LANE_WIDTH, fromeRd.getY() + fromeRd.getLength()*2 + height + PedestrianLane.LANE_WIDTH*2, 270, statsCollector);
-			fromeRd.addLane(entryLane);
-			trafficLightController.addLane(entryLane);
-			fromeRd.addLane(exitLane);
-			entryLane.addExitLane(exitLane);
-			currentWidth += VehicleLane.LANE_WIDTH;
+			fromeRd.addLane(bottomLane);
+			northTce.addLane(bottomExitLane);
+			bottomLane.addExitLane(bottomExitLane);
 			
-			//the last index of the array
-			if ( i == numLanes-1){
-				rightExit[MAP_FRN] = exitLane;
-			}
-			if ( i == numLanes/2 ){
-				setTrafficLightCoords(7,entryLane,(numLanes % 2 == 0));
-			}
+			trafficLightController.addLane(bottomLane);
+			setTrafficLightCoords(9, bottomLane);
 		}
 		
-		//-----------------FROME ROAD RIGHT LANES NORTH AND SOUTH-----------//
-		//Add Right lanes
-		entryLane = new VehicleLane(VehicleLane.Type.RIGHT, fromeRd, fromeRd.getX() - currentWidth, fromeRd.getY(), 90, statsCollector);
-		exitLane = new VehicleLane(VehicleLane.Type.RIGHT, fromeRd, fromeRd.getX() - currentWidth - VehicleLane.LANE_WIDTH, fromeRd.getY() + fromeRd.getLength()*2 + height + PedestrianLane.LANE_WIDTH*2, 270, statsCollector);
-		fromeRd.addLane(entryLane);
-		trafficLightController.addLane(entryLane);
-		fromeRd.addLane(exitLane);
-		trafficLightController.addLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-		
-		setTrafficLightCoords(11,exitLane);
-		setTrafficLightCoords(8,entryLane);
-
-		
-		//add right lanes to the entry lane
-		rightEntry[RIGHT_FRS] = entryLane;
-		rightEntry[RIGHT_FRN] = exitLane;
-		
-		//---------------FROME ROAD SOUTH STRAIGHT LANES-----------------//
-		//Loop to create the straight_ lanes
-		for (int i = 0; i < numLanes; i++) {
-			entryLane = new VehicleLane(VehicleLane.Type.STRAIGHT_, fromeRd, fromeRd.getX() - currentWidth, fromeRd.getY(), 90, statsCollector);
-			exitLane = new VehicleLane(VehicleLane.Type.STRAIGHT, fromeRd, fromeRd.getX() - currentWidth - VehicleLane.LANE_WIDTH, fromeRd.getY() + fromeRd.getLength()*2 + height + PedestrianLane.LANE_WIDTH*2, 270, statsCollector);
-			fromeRd.addLane(entryLane);
-			fromeRd.addLane(exitLane);
-			exitLane.addExitLane(entryLane);
-			trafficLightController.addLane(exitLane);
-			currentWidth += VehicleLane.LANE_WIDTH;
+		// LEFT TURN STRAIGHT LANES ON FROME
+		for (int i = 0; i < sp.numLanesFromeStraightLeft; i++) {
+			// TOP
+			VehicleLane topLane = createLane(VehicleLane.Type.LEFT_STRAIGHT,
+					i + sp.numLanesFromeLeft, Side.NORTH, false);
+			VehicleLane topLaneExitLeft = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesFromeLeft, Side.EAST, true);
+			VehicleLane topLaneExitStraight = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesFromeLeft, Side.SOUTH, true);
 			
-			//add the first straight road to right lanes exit lane, as the lanes are being created from middle in here
-			if ( i == 0 ){
-				rightExit[MAP_FRS] = entryLane;
-			}
+			fromeRd.addLane(topLane);
+			northTce.addLane(topLaneExitLeft);
+			fromeRd.addLane(topLaneExitStraight);
 			
-			if ( i == numLanes/2 ){
-				setTrafficLightCoords(10,exitLane,(numLanes % 2 == 0));
-			}
+			topLane.addExitLane(topLaneExitStraight); // Straight has to be index 0 because cars look at exitLanes[0] for the straight exit
+			topLane.addExitLane(topLaneExitLeft);
+			
+			trafficLightController.addLane(topLane);
+			setTrafficLightCoords(6, topLane);
+			
+			// BOTTOM
+			VehicleLane bottomLane = createLane(VehicleLane.Type.LEFT_STRAIGHT,
+					i + sp.numLanesFromeLeft, Side.SOUTH, false);
+			VehicleLane bottomLaneExitLeft = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesFromeLeft, Side.WEST, true);
+			VehicleLane bottomLaneExitStraight = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesFromeLeft, Side.NORTH, true);
+			
+			fromeRd.addLane(bottomLane);
+			northTce.addLane(bottomLaneExitLeft);
+			fromeRd.addLane(bottomLaneExitStraight);
+			
+			bottomLane.addExitLane(bottomLaneExitStraight); // Straight has to be index 0 because cars look at exitLanes[0] for the straight exit
+			bottomLane.addExitLane(bottomLaneExitLeft);
+			
+			trafficLightController.addLane(bottomLane);
+			setTrafficLightCoords(9, bottomLane);
 		}
 		
-		//--------------FROME RAOD SOUTH LEFT LANE----------------//
-		//Add LEFT_STRAIGHT_ lanea
-		entryLane = new VehicleLane(leftMostLaneTypeOpposite, fromeRd, fromeRd.getX() - currentWidth, fromeRd.getY(), 90, statsCollector);
-		exitLane = new VehicleLane(leftMostLaneType, fromeRd, fromeRd.getX() - currentWidth - VehicleLane.LANE_WIDTH, fromeRd.getY() + fromeRd.getLength()*2 + height + PedestrianLane.LANE_WIDTH*2, 270, statsCollector);
-		fromeRd.addLane(entryLane);
-		fromeRd.addLane(exitLane);
-		exitLane.addExitLane(entryLane);
-		trafficLightController.addLane(exitLane);
-		currentWidth += VehicleLane.LANE_WIDTH;
-		
-		//add FROM ROAD NORTH exit lane
-		leftExit[MAP_FRS] = entryLane;
-		//store left entry lane 
-		leftEntry[LEFT_FRN] = exitLane;
-		setTrafficLightCoords(9,exitLane);
-
-		
-		//add all the exit lanes to the entry lanes -> this will be used to determine how a car exits a lane, ie allowing a car to turn
-		for( int i = 0 ; i < leftExit.length ; i++ ) {
-			leftEntry[i].addExitLane(leftExit[i]);
-			rightEntry[i].addExitLane(rightExit[i]);
+		// STRAIGHT LANES ON FROME
+		for (int i = 0; i < sp.numLanesFromeStraight; i++) {
+			// TOP
+			VehicleLane topLane = createLane(VehicleLane.Type.STRAIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft, Side.NORTH, false);
+			VehicleLane topLaneExitStraight = createLane(VehicleLane.Type.STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft, Side.SOUTH, true);
+			
+			fromeRd.addLane(topLane);
+			fromeRd.addLane(topLaneExitStraight);
+			topLane.addExitLane(topLaneExitStraight);
+			
+			trafficLightController.addLane(topLane);
+			setTrafficLightCoords(7, topLane);
+			
+			// BOTTOM
+			VehicleLane bottomLane = createLane(VehicleLane.Type.STRAIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft, Side.SOUTH, false);
+			VehicleLane bottomLaneExitStraight = createLane(VehicleLane.Type.STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft, Side.NORTH, true);
+			
+			fromeRd.addLane(bottomLane);
+			fromeRd.addLane(bottomLaneExitStraight);
+			bottomLane.addExitLane(bottomLaneExitStraight);
+			
+			trafficLightController.addLane(bottomLane);
+			setTrafficLightCoords(10, bottomLane);
 		}
 		
-		ArrayList<VehicleLane> vLanes = northTce.getVehicleLanes();
-		for( int i = 0 ; i < vLanes.size() ; i ++ ) {
-			switch (vLanes.get(i).getType()){
-			case LEFT_STRAIGHT:
-			case STRAIGHT :
-				int dir = (int)vLanes.get(i).dirDeg();
-				if ( dir == 0 ) {
-					vLanes.get(i).setBox(boxes[1]);
-				} else if ( dir == 180 ) {
-					vLanes.get(i).setBox(boxes[0]);					
-				}
-			}
+		// STRAIGHT RIGHT LANES ON FROME
+		for (int i = 0; i < sp.numLanesFromeStraightRight; i++) {
+			// TOP
+			VehicleLane topLane = createLane(VehicleLane.Type.RIGHT_STRAIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.NORTH, false);
+			VehicleLane topLaneExitRight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.WEST, true);
+			VehicleLane topLaneExitStraight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.SOUTH, true);
+			
+			fromeRd.addLane(topLane);
+			northTce.addLane(topLaneExitRight);
+			fromeRd.addLane(topLaneExitStraight);
+			
+			topLane.addExitLane(topLaneExitStraight); // Straight has to be index 0 because cars look at exitLanes[0] for the straight exit
+			topLane.addExitLane(topLaneExitRight);
+			
+			trafficLightController.addLane(topLane);
+			setTrafficLightCoords(8, topLane);
+			
+			// BOTTOM
+			VehicleLane bottomLane = createLane(VehicleLane.Type.RIGHT_STRAIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.SOUTH, false);
+			VehicleLane bottomLaneExitRight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.EAST, true);
+			VehicleLane bottomLaneExitStraight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight, Side.NORTH, true);
+			
+			fromeRd.addLane(bottomLane);
+			northTce.addLane(bottomLaneExitRight);
+			fromeRd.addLane(bottomLaneExitStraight);
+			
+			bottomLane.addExitLane(bottomLaneExitStraight);
+			bottomLane.addExitLane(bottomLaneExitRight);
+			
+			trafficLightController.addLane(bottomLane);
+			setTrafficLightCoords(11, bottomLane);
 		}
 		
-		vLanes = fromeRd.getVehicleLanes();
-		for( int i = 0 ; i < vLanes.size() ; i ++ ) {
-			switch (vLanes.get(i).getType()){
-			case LEFT_STRAIGHT:
-			case STRAIGHT :
-				int dir = (int)vLanes.get(i).dirDeg();
-				if ( dir == 90 ) {
-					vLanes.get(i).setBox(boxes[3]);
-				} else if ( dir == 270 ) {
-					vLanes.get(i).setBox(boxes[2]);					
-				}
-			}
+		// RIGHT LANES ON FROME
+		for (int i = 0; i < sp.numLanesFromeRight; i++) {
+			// TOP
+			VehicleLane topLane = createLane(VehicleLane.Type.RIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight + sp.numLanesFromeStraightRight,
+					Side.NORTH, false);
+			VehicleLane topLaneExitRight = createLane(VehicleLane.Type.RIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight + sp.numLanesFromeStraightRight,
+					Side.WEST, true);
+			
+			fromeRd.addLane(topLane);
+			northTce.addLane(topLaneExitRight);
+			topLane.addExitLane(topLaneExitRight);
+			
+			trafficLightController.addLane(topLane);
+			setTrafficLightCoords(8, topLane);
+			
+			// BOTTOM
+			VehicleLane bottomLane = createLane(VehicleLane.Type.RIGHT,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight + sp.numLanesFromeStraightRight,
+					Side.SOUTH, false);
+			VehicleLane bottomLaneExitRight = createLane(VehicleLane.Type.RIGHT_,
+					i + sp.numLanesFromeLeft + sp.numLanesFromeStraightLeft + sp.numLanesFromeStraight + sp.numLanesFromeStraightRight,
+					Side.EAST, true);
+			
+			fromeRd.addLane(bottomLane);
+			northTce.addLane(bottomLaneExitRight);
+			bottomLane.addExitLane(bottomLaneExitRight);
+			
+			trafficLightController.addLane(bottomLane);
+			setTrafficLightCoords(11, bottomLane);
 		}
-
-		//add the boxes to the lanes
-		addBoxNorth(rightEntry[RIGHT_NTW],boxes[0],2);
-		addBoxNorth(rightEntry[RIGHT_NTE], boxes[1],5 );
-		addBoxSouth(rightEntry[RIGHT_FRS],boxes[2],8);
-		addBoxSouth(rightEntry[RIGHT_FRN],boxes[3],11);
 		
+		// TODO: NORTH TERRACE
+		// LEFT TURN ON NORTH TERRACE
+		for (int i = 0; i < sp.numLanesNorthLeft; i++) {
+			// LEFT
+			VehicleLane leftLane = createLane(VehicleLane.Type.LEFT, i, Side.WEST, false);
+			VehicleLane leftExitLane = createLane(VehicleLane.Type.LEFT_,
+					i, Side.NORTH, true);
+			
+			northTce.addLane(leftLane);
+			fromeRd.addLane(leftExitLane);
+			leftLane.addExitLane(leftExitLane); 
+			
+			trafficLightController.addLane(leftLane);
+			setTrafficLightCoords(0, leftLane);
+			
+			// RIGHT
+			VehicleLane rightLane = createLane(VehicleLane.Type.LEFT,
+					i, Side.EAST, false);
+			VehicleLane rightExitLane = createLane(VehicleLane.Type.LEFT_,
+					i, Side.SOUTH, true);
+			
+			northTce.addLane(rightLane);
+			fromeRd.addLane(rightExitLane);
+			rightLane.addExitLane(rightExitLane);
+			
+			trafficLightController.addLane(rightLane);
+			setTrafficLightCoords(3, rightLane);
+		}
+		
+		// LEFT TURN STRAIGHT LANES ON NTCE
+		for (int i = 0; i < sp.numLanesNorthStraightLeft; i++) {
+			// LEFT
+			VehicleLane leftLane = createLane(VehicleLane.Type.LEFT_STRAIGHT,
+					i + sp.numLanesNorthLeft, Side.WEST, false);
+			VehicleLane leftLaneExitLeft = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesNorthLeft, Side.NORTH, true);
+			VehicleLane leftLaneExitStraight = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesNorthLeft, Side.EAST, true);
+			
+			northTce.addLane(leftLane);
+			fromeRd.addLane(leftLaneExitLeft);
+			northTce.addLane(leftLaneExitStraight);
+			
+			leftLane.addExitLane(leftLaneExitStraight); // Straight has to be index 0 because cars look at exitLanes[0] for the straight exit
+			leftLane.addExitLane(leftLaneExitLeft);
+			
+			trafficLightController.addLane(leftLane);
+			setTrafficLightCoords(1, leftLane);
+			
+			// RIGHT
+			VehicleLane rightLane = createLane(VehicleLane.Type.LEFT_STRAIGHT,
+					i + sp.numLanesNorthLeft, Side.EAST, false);
+			VehicleLane rightLaneExitLeft = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesNorthLeft, Side.SOUTH, true);
+			VehicleLane rightLaneExitStraight = createLane(VehicleLane.Type.LEFT_STRAIGHT_,
+					i + sp.numLanesNorthLeft, Side.WEST, true);
+			
+			northTce.addLane(rightLane);
+			fromeRd.addLane(rightLaneExitLeft);
+			northTce.addLane(rightLaneExitStraight);
+			
+			rightLane.addExitLane(rightLaneExitStraight);
+			rightLane.addExitLane(rightLaneExitLeft);
+			
+			trafficLightController.addLane(rightLane);
+			setTrafficLightCoords(4, rightLane);
+		}
+		
+		// STRAIGHT LANES ON NTCE
+		for (int i = 0; i < sp.numLanesNorthStraight; i++) {
+			// LEFT
+			VehicleLane leftLane = createLane(VehicleLane.Type.STRAIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft, Side.WEST, false);
+			VehicleLane leftLaneExitStraight = createLane(VehicleLane.Type.STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft, Side.EAST, true);
+			
+			northTce.addLane(leftLane);
+			northTce.addLane(leftLaneExitStraight);
+			leftLane.addExitLane(leftLaneExitStraight);
+			
+			trafficLightController.addLane(leftLane);
+			setTrafficLightCoords(1, leftLane);
+			
+			// RIGHT
+			VehicleLane rightLane = createLane(VehicleLane.Type.STRAIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft, Side.EAST, false);
+			VehicleLane rightLaneExitStraight = createLane(VehicleLane.Type.STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft, Side.WEST, true);
+			
+			northTce.addLane(rightLane);
+			northTce.addLane(rightLaneExitStraight);
+			rightLane.addExitLane(rightLaneExitStraight);
+			
+			trafficLightController.addLane(rightLane);
+			setTrafficLightCoords(4, rightLane);
+		}
+		
+		// STRAIGHT RIGHT LANES ON NTCE
+		for (int i = 0; i < sp.numLanesNorthStraightRight; i++) {
+			// LEFT
+			VehicleLane leftLane = createLane(VehicleLane.Type.RIGHT_STRAIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.WEST, false);
+			VehicleLane leftLaneExitRight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.SOUTH, true);
+			VehicleLane leftLaneExitStraight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.EAST, true);
+			
+			northTce.addLane(leftLane);
+			fromeRd.addLane(leftLaneExitRight);
+			northTce.addLane(leftLaneExitStraight);
+			
+			leftLane.addExitLane(leftLaneExitStraight); // Straight has to be index 0 because cars look at exitLanes[0] for the straight exit
+			leftLane.addExitLane(leftLaneExitRight);
+			
+			trafficLightController.addLane(leftLane);
+			setTrafficLightCoords(2, leftLane);
+			
+			// RIGHT
+			VehicleLane rightLane = createLane(VehicleLane.Type.RIGHT_STRAIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.EAST, false);
+			VehicleLane rightLaneExitRight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.NORTH, true);
+			VehicleLane rightLaneExitStraight = createLane(VehicleLane.Type.RIGHT_STRAIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight, Side.WEST, true);
+			
+			northTce.addLane(rightLane);
+			fromeRd.addLane(rightLaneExitRight);
+			northTce.addLane(rightLaneExitStraight);
+			
+			trafficLightController.addLane(rightLane);
+			setTrafficLightCoords(5, rightLane);
+		}
+		
+		// RIGHT LANES ON NTCE
+		for (int i = 0; i < sp.numLanesNorthRight; i++) {
+			// LEFT
+			VehicleLane leftLane = createLane(VehicleLane.Type.RIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight + sp.numLanesNorthStraightRight,
+					Side.WEST, false);
+			VehicleLane leftLaneExitRight = createLane(VehicleLane.Type.RIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight + sp.numLanesNorthStraightRight,
+					Side.SOUTH, true);
+			
+			northTce.addLane(leftLane);
+			fromeRd.addLane(leftLaneExitRight);
+			leftLane.addExitLane(leftLaneExitRight);
+			
+			trafficLightController.addLane(leftLane);
+			setTrafficLightCoords(2, leftLane);
+			
+			// RIGHT
+			VehicleLane rightLane = createLane(VehicleLane.Type.RIGHT,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight + sp.numLanesNorthStraightRight,
+					Side.EAST, false);
+			VehicleLane rightLaneExitRight = createLane(VehicleLane.Type.RIGHT_,
+					i + sp.numLanesNorthLeft + sp.numLanesNorthStraightLeft + sp.numLanesNorthStraight + sp.numLanesNorthStraightRight,
+					Side.NORTH, true);
+			
+			northTce.addLane(rightLane);
+			fromeRd.addLane(rightLaneExitRight);
+			rightLane.addExitLane(rightLaneExitRight);
+			
+			trafficLightController.addLane(rightLane);
+			setTrafficLightCoords(5, rightLane);
+		}
+		
+//		//Boxes that we need to add lanes to
+//		Box[] boxes = new Box[4];
+//		for( int i = 0 ; i < boxes.length ; i++ ){
+//			boxes[i] = new Box();
+//		}
+//		
+//		ArrayList<VehicleLane> vLanes = northTce.getVehicleLanes();
+//		for( int i = 0 ; i < vLanes.size() ; i ++ ) {
+//			switch (vLanes.get(i).getType()){
+//			case LEFT_STRAIGHT:
+//			case STRAIGHT :
+//				int dir = (int)vLanes.get(i).dirDeg();
+//				if ( dir == 0 ) {
+//					vLanes.get(i).setBox(boxes[1]);
+//				} else if ( dir == 180 ) {
+//					vLanes.get(i).setBox(boxes[0]);					
+//				}
+//			}
+//		}
+//		
+//		vLanes = fromeRd.getVehicleLanes();
+//		for( int i = 0 ; i < vLanes.size() ; i ++ ) {
+//			switch (vLanes.get(i).getType()){
+//			case LEFT_STRAIGHT:
+//			case STRAIGHT :
+//				int dir = (int)vLanes.get(i).dirDeg();
+//				if ( dir == 90 ) {
+//					vLanes.get(i).setBox(boxes[3]);
+//				} else if ( dir == 270 ) {
+//					vLanes.get(i).setBox(boxes[2]);					
+//				}
+//			}
+//		}
+//
+//		//add the boxes to the lanes
+//		addBoxNorth(rightEntry[RIGHT_NTW], boxes[0],2);
+//		addBoxNorth(rightEntry[RIGHT_NTE], boxes[1],5 );
+//		addBoxSouth(rightEntry[RIGHT_FRS], boxes[2],8);
+//		addBoxSouth(rightEntry[RIGHT_FRN], boxes[3],11);
+		
+		
+		// TODO: PEDESTRIAN STUFF
 		//lets set the coordinates of the pedestrian lights
 		ArrayList<PedestrianLane> lanes = northTce.getPedestrianLanes();
 			for( int i = 0 ; i < lanes.size() ; i += 2 ){
@@ -766,7 +910,6 @@ public class Intersection {
 		//Set adjacent lanes of each road, ie set the lanes left and right of each lane
 		northTce.setAdjacentLanes();
 		fromeRd.setAdjacentLanes();
-		
 		
 		//---Add Taxi Rank---//
 		double rankX = x + width + PedestrianLane.LANE_WIDTH + northTce.getLength()/2;

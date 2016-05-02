@@ -703,16 +703,16 @@ public class TrafficLightController
 	 * */
 	public void addLane(VehicleLane lane)
 	{
-		VehicleLane.Type dir = lane.getType();
-		Road.Type road = lane.road().getROAD();
-		int[] lightOffset = dir.getLights();
+		VehicleLane.Type laneType = lane.getType();
+		Road.Type roadType = lane.road().getROAD();
+		int[] lightOffset = laneType.getLights();
 		for ( int i = 0 ; i < lightOffset.length ; i++ ) {
 				int light = lightOffset[i]; // the number of the light that the lane will be added to
 				// if the direction of the lane is 180 or 270, it is on the opposite side of the road, so 3 needs to be added to the light
 				if ( lane.dirDeg() == 180 || lane.dirDeg() == 270 ) {
 					light +=3;
 				}
-				trafficLight[light + road.getRoadNum()].addLane(lane); 
+				trafficLight[light + roadType.getRoadNum()].addLane(lane);
 		}
 	}
 	
