@@ -3,7 +3,6 @@ package npe.sim.light;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import java.awt.*;
@@ -33,7 +32,7 @@ public class TrafficLightController
 	public final static int DEFAULT_RED_DELAY = 5; 
 	public final static int FLASHING_DELAY = 20;
 	public final static int NUM_PED_LIGHTS = 4;
-	
+
 	public final static int MIN_RIGHT_DURATION = 6;
 	public final static int MAX_RIGHT_DURATION = 20;
 	public final static int MIN_STRAIGHT_DURATION = 20;
@@ -42,22 +41,22 @@ public class TrafficLightController
 	public final int MAX_YELLOW_DURATION = 6;
 	public final int MIN_STATE_DURATION = 4;
 
-	
+
 
 	public final static int NTW_DEFAULT_RIGHT = 7;
 	public final static int NTE_DEFAULT_RIGHT = 7;
 	public final static int NTW_DEFAULT_STRAIGHT = 23;
 	public final static int NTE_DEFAULT_STRAIGHT = 23;
 	public final static int NT_DEFAULT_YELLOW = 5;
-	
+
 	public final static int FRN_DEFAULT_RIGHT = 7;
 	public final static int FRS_DEFAULT_RIGHT = 7;
 	public final static int FRN_DEFAULT_STRAIGHT = 25;
 	public final static int FRS_DEFAULT_STRAIGHT = 25;
 	public final static int FR_DEFAULT_YELLOW = 5;
 
-	
-	
+
+
 	/** The duration of the north tce west right hand turn */
 	private int ntw_right = 10;
 	/** The duration of the norht tce east right hand turn */
@@ -76,25 +75,25 @@ public class TrafficLightController
 	private int frn_straight = 25;
 	/** The duration of the straight light on from road south */
 	private int frs_straight = 25;
-	
+
 	/** Traffic lights that the controller has controller over */
 	private TrafficLight[] trafficLight;
-	
+
 	/**Pedestrian lights that the controller has control over */
 	private PedestrianLight[] pedestrianLight;
-	
+
 	/** States of the traffic light sequence */
 	private State[] state;
-	
+
 	/** The traffic light sequence */
 	private Sequence sequence;
-	
-	
+
+
 
 	/** Integer to represent the current state the intersection is in */
 	private int currentState;
-	
-	
+
+
 	/**
 	 * Construct Traffic Light Controller with a set number of lights
 	 * @param numTrafficLights Number of traffic lights the controller will controll
@@ -108,13 +107,13 @@ public class TrafficLightController
 		pedestrianLight = new PedestrianLight[NUM_PED_LIGHTS];
 		sequence = new Sequence();
 		readCsv();
-		
-		//Initialise all traffic lights
+
+		//Initialize all traffic lights
 		for( int i = 0 ; i < trafficLight.length ; i++ ) {
 			trafficLight[i] = new TrafficLight(i);
 		}
-		
-		//Initialise all pedestrian lights
+
+		//Initialize all pedestrian lights
 		for ( int i = 0 ; i < pedestrianLight.length ; i++ ) {
 			pedestrianLight[i] = new PedestrianLight(i);
 		}
@@ -122,13 +121,13 @@ public class TrafficLightController
 		//Get states from sequence
 		TrafficLight.State[][] states = sequence.getStates();
 
-		//Initialise all states of the intersection
+		//Initialize all states of the intersection
 		state = new State[states.length];
 		for ( int i = 0 ; i < states.length ; i++ ) {
 			state[i] = new State(i,states[i]);
 		}
 		currentState = state.length - 1; //first state should be a red light state
-		
+
 		//Set default durations of the system
 		setDefaultStateDuration();
 
@@ -139,8 +138,8 @@ public class TrafficLightController
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Loads a config file
 	 */
@@ -170,7 +169,9 @@ public class TrafficLightController
 			//set the sequence numbers
 			sequence.setSequence(Road.Type.FROME, fromeSeq);
 			sequence.setSequence(Road.Type.NORTH, northSeq);
-
+			if( br != null) {
+				br.close();
+			}
 		} catch (IOException e){
 			System.err.println("WARNING: Failed to read from config file: Loading defaults");
 			//set the defaults up
@@ -180,12 +181,13 @@ public class TrafficLightController
 			//If values in the csv are not valid, set as defaults
 			setDefaults();
 		}
-		
+
 		finally {
 			try {
 				if( fr != null ) {
 					fr.close();
 				}
+
 			} catch (IOException e) {
 				System.err.println("WARNING: Failed to close CSV file");
 			}
@@ -248,7 +250,7 @@ public class TrafficLightController
 		int oldDuration = 0; 
 		State finalState = null;
 
-		
+
 		///find out what kind of light it is
 		switch ( trafficLight[tid].TYPE ){
 		//left and right lanes simply change only 1 state, the state at which they occur in
@@ -269,7 +271,7 @@ public class TrafficLightController
 			//depending on what the sequence is depends on what states will being changed
 			switch (sequenceNum) {
 			case 0 :
-			//$FALL_THROUGH$
+				//$FALL_THROUGH$
 			case 3 :
 				//sequence 1 and 4 the 2nd state changed is the state that we want
 				finalState = statesChanged.get(1);
@@ -293,7 +295,7 @@ public class TrafficLightController
 				}
 				break;
 			}
-			
+
 			break;
 		}
 
@@ -308,10 +310,10 @@ public class TrafficLightController
 		//ensure that duration is greater than 5
 		//if it is not 5 seconds in length, then we want dont want to update the state
 		if( duration < minDuration || duration > maxDuration) {
-			//unsuccesful -> return the minimum number of the state
+			//Unsuccessful -> return the minimum number of the state
 			return trafficLight[tid].getGreenDuration();
 		}
-		
+
 		oldDuration = finalState.getStateDuration();
 		finalState.setStateDuration(duration);
 
@@ -323,18 +325,18 @@ public class TrafficLightController
 		//successful -> return true
 		return trafficLight[tid].getGreenDuration();
 	}
-	
-	
+
+
 	/**
-	 * Find Which states the traffic light is a certain state/colour in. Ie If tlState was green, find all states that the traffic light is green in.
-	 * @param lightIndex The index of the Traiffic light that is being checked
+	 * Find Which states the traffic light is a certain state/color in. Ie If tlState was green, find all states that the traffic light is green in.
+	 * @param lightIndex The index of the Traffic light that is being checked
 	 * @param tlState The states that is being searched for
 	 * @return An arrayList of states. That the traffic light at light index = tlState
 	 */
 	private ArrayList<State> findTrafficLightInState(int lightIndex, TrafficLight.State tlState) 
 	{
 		ArrayList<State> statesFound = new ArrayList<State>();
-		
+
 		for(int i = 0 ; i<state.length ; i++) {
 			TrafficLight.State tempState = state[i].getTrafficLightState(lightIndex);
 			if( tempState == tlState ) {
@@ -343,7 +345,7 @@ public class TrafficLightController
 		}
 		return statesFound;
 	}
-	
+
 	/** Set all states to the default durations */
 	private void setDefaultStateDuration() 
 	{
@@ -361,12 +363,12 @@ public class TrafficLightController
 		case 3 : 
 			stateSize = setDefaultSeqFour(stateSize);
 			break;
-			default:
-				//TODO HANDLE SOME SORT OF CRASH
-				System.err.println("ERROR: Invalid sequence intered in traffic light controller");
-				break;
+		default:
+			//TODO HANDLE SOME SORT OF CRASH
+			System.err.println("ERROR: Invalid sequence intered in traffic light controller");
+			break;
 		}
-		
+
 		switch ( sequence.getFrome() ){
 		case 0 :
 			stateSize = setDefaultSeqOne(stateSize);
@@ -380,10 +382,10 @@ public class TrafficLightController
 		case 3 : 
 			stateSize = setDefaultSeqFour(stateSize);
 			break;
-			default:
-				//TODO HANDLE SOME SORT OF CRASH
-				System.err.println("ERROR: Invalid sequence intered in traffic light controller");
-				break;
+		default:
+			//TODO HANDLE SOME SORT OF CRASH
+			System.err.println("ERROR: Invalid sequence intered in traffic light controller");
+			break;
 		}
 		//ensure that firstState + 5 is at least 4
 		for( State s : state){
@@ -393,7 +395,7 @@ public class TrafficLightController
 		}
 		//ensure that all traffic lights are within there maximum values
 	}
-	
+
 	/**
 	 * Get a jtable of the traffic light sequence
 	 * @return JTable of traffic light sequence
@@ -417,18 +419,18 @@ public class TrafficLightController
 		trafficLightT.setDefaultRenderer(Object.class, new CellRender());
 		//set the size of the table to the parameters passed in
 		trafficLightT.setSize(width,height); 
-		
+
 		//row length varia
 		int rowLength = trafficLight.length + 1;
 		Vector<String> row1 = new Vector<String>(trafficLight.length + 1);
-		
+
 		row1.add("<html>T<br>i<br>m<br>e<br>(s)<br></html>");
 		for( int i = 0 ; i < trafficLight.length ; i++ ) {
 			row1.add( "<html>L<br>i<br>g<br>h<br>t<br> " + (i + 1) );
 		}
 
 		model.addRow(row1);
-		
+
 		//add all states to the table
 		for ( int i = 0 ; i < state.length ; i++ ) {
 			Vector<Object> row = new Vector<Object>(rowLength);
@@ -444,11 +446,13 @@ public class TrafficLightController
 			case GREEN_RIGHT:
 				model.addEditableState(i);
 				break;
+			default:
+				break;
 			}
 
 			model.addRow(row);
 		}
-		
+
 		//--------SCALE ROWS BY STATE DURATION--------//
 		int totalDuration = totalDuration();
 		trafficLightT.setRowHeight(0,60);
@@ -459,18 +463,18 @@ public class TrafficLightController
 			double rowHeight = ((double) stateDuration / (double)totalDuration) * stateHeight;
 			trafficLightT.setRowHeight(i+1, (int) rowHeight);
 		}
-		
+
 
 		trafficLightT.setShowGrid(true);
 		return trafficLightT;
 	}
-	
+
 	/** Get the number of states in the currenly set sequence */
 	public int getNumStates()
 	{
 		return state.length;
 	}
-	
+
 	/** To string method used for debugging, to get all the traffic light durations */
 	public String getTrafficLightDurations()
 	{
@@ -480,19 +484,24 @@ public class TrafficLightController
 		}
 		return retString;
 	}
-	
+
 	/**
 	 * Cell renderer, used to paint the colours of the cell the appropriate colours.
 	 */
 	private class CellRender extends DefaultTableCellRenderer
 	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -944844482280496508L;
+
 		/** overiding getTable cell rederer
 		 * This rendered will paint all cells with a light the appropriate colour
 		 * It overides the value of traffic light state cells so they dont display there string
 		 */
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			
+
 			Font font = new Font("Serif",Font.PLAIN,8);
 			if( value instanceof TrafficLight.State ){
 				switch( (TrafficLight.State) value ) {
@@ -516,19 +525,23 @@ public class TrafficLightController
 				cell.setBackground(Color.WHITE);
 				cell.setFont(font);
 			}
-				
+
 			return cell;
 		}
 
 
 	}
-	
+
 	/**
 	 * Table light model. Used by the traffic light table
 	 * The table model is needed for enabling certain cells to be editable
 	 */
 	private class TrafficLightModel extends DefaultTableModel
 	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1874830351883173696L;
 		/** An array list of integers corresponding to the the editable cells in the table */
 		private ArrayList<Integer> editableStates = new ArrayList<Integer>();
 
@@ -567,7 +580,7 @@ public class TrafficLightController
 			editableStates.add(state);
 		}
 	}
-	
+
 	/** Get the total duration of one loop of the entire sequence  */
 	private int totalDuration()
 	{
@@ -577,7 +590,7 @@ public class TrafficLightController
 		}
 		return duration;
 	}
-	
+
 	/**
 	 * Private function used to increment the duration of a colour of a traffic light.
 	 * @param light The Traffic light to change
@@ -585,17 +598,19 @@ public class TrafficLightController
 	 */
 	private void increaseDuration(TrafficLight light, TrafficLight.State state, int duration) 
 	{
-			switch(state){
-			case RED :
-				light.addRedDuration(duration);
-				break;
-			case YELLOW :
-				light.setYellowDuration(duration);
-				break;
-			case GREEN :
-				light.addGreenDuration(duration);
-				break;
-			}
+		switch(state){
+		case RED :
+			light.addRedDuration(duration);
+			break;
+		case YELLOW :
+			light.setYellowDuration(duration);
+			break;
+		case GREEN :
+			light.addGreenDuration(duration);
+			break;
+		default:
+			break;
+		}
 
 	}
 
@@ -608,7 +623,7 @@ public class TrafficLightController
 	{
 		return trafficLight[selected].getRedDuration();
 	}
-	
+
 	/**
 	 * Get the yellow duration of a selected traffic light
 	 * @param selected The index of the traffic light
@@ -628,7 +643,7 @@ public class TrafficLightController
 	{
 		return trafficLight[selected].getGreenDuration();
 	}
-	
+
 	/**
 	 * Get the current sequence of the traffic light system
 	 * @return The sequence that the traffic light controller has set
@@ -637,7 +652,7 @@ public class TrafficLightController
 	{
 		return sequence;
 	}
-	
+
 	/** Update the traffic light sequence, based on the new sequence that has been set. */
 	public void updateSequence()
 	{
@@ -654,13 +669,13 @@ public class TrafficLightController
 		for ( int i = 0 ; i < states.length ; i++ ) {
 			state[i] = new State(i,states[i]);
 		}
-		
+
 		//update current state to last state, ie starts at a red light
 		currentState = state.length -1;
-		
+
 		//Set default durations
 		setDefaultStateDuration();
-		
+
 		//reset all traffic light durations to 0
 		for( TrafficLight tl : trafficLight ) {
 			tl.clearDurations();
@@ -671,7 +686,7 @@ public class TrafficLightController
 				increaseDuration( trafficLight[j] , state[i].getTrafficLightState(j) , state[i].getStateDuration() );
 			}
 		}
-		
+
 		//ensure that all new traffic light durations are within there maximum bounds
 		for( TrafficLight tl : trafficLight ) {
 			switch ( tl.TYPE ) {
@@ -688,14 +703,14 @@ public class TrafficLightController
 					changeLight(tl.getId(),TrafficLight.State.GREEN,MAX_STRAIGHT_DURATION);
 				}
 				break;
-				
+
 			}
 		}
 
-		
-		
+
+
 	}
-	
+
 	/**
 	 *  Adds the appropriate lane to a traffic light(s). 
 	 *  1 lane may have multiple traffic lights that affect it 
@@ -707,15 +722,15 @@ public class TrafficLightController
 		Road.Type road = lane.road().getROAD();
 		int[] lightOffset = dir.getLights();
 		for ( int i = 0 ; i < lightOffset.length ; i++ ) {
-				int light = lightOffset[i]; // the number of the light that the lane will be added to
-				// if the direction of the lane is 180 or 270, it is on the opposite side of the road, so 3 needs to be added to the light
-				if ( lane.dirDeg() == 180 || lane.dirDeg() == 270 ) {
-					light +=3;
-				}
-				trafficLight[light + road.getRoadNum()].addLane(lane); 
+			int light = lightOffset[i]; // the number of the light that the lane will be added to
+			// if the direction of the lane is 180 or 270, it is on the opposite side of the road, so 3 needs to be added to the light
+			if ( lane.dirDeg() == 180 || lane.dirDeg() == 270 ) {
+				light +=3;
+			}
+			trafficLight[light + road.getRoadNum()].addLane(lane); 
 		}
 	}
-	
+
 	/**
 	 * Change all the states of the traffic lights. THis will be called by traffic light controller when a state changed event arrises
 	 * @return The time of the new state.
@@ -728,7 +743,7 @@ public class TrafficLightController
 		}
 		return state[currentState].getStateDuration();
 	}
-	
+
 	/** The tick method, this will be called during simulation at each step. */
 	public void tick() 
 	{
@@ -739,7 +754,7 @@ public class TrafficLightController
 			pl.tick();
 		}
 	}
-	
+
 	/**
 	 * The daw method, This will call draw on every traffic light and pedestrian light
 	 * @param g The graphics to draw to.
@@ -763,7 +778,7 @@ public class TrafficLightController
 		if( state.length != states.length ) {
 			return false;
 		}
-		
+
 		for ( int i = 0 ; i < states.length ; i ++ ) {
 			for ( int j = 0 ; j < states[i].length ; j++ ) {
 				if(states[i][j] != state[i].getTrafficLightState(j)) {
@@ -774,7 +789,7 @@ public class TrafficLightController
 		return true;
 
 	}
-	
+
 	/**
 	 * Get all the starting events for all pedestrian lights
 	 * @return An arraylist of the starting events for all pedestrian lights
@@ -785,7 +800,7 @@ public class TrafficLightController
 		//once we find ourselfs a green man, find out the state in which the arrow turns green arrow turns yellow
 		//from here we have the total duration of the light
 		//we can then set a flashing man, to total time minus a constant that can be changed once we know what we want it to be
-		
+
 		int start = 0;
 		int end = 1;
 		int[][] stateInfo = new int[4][2];
@@ -794,14 +809,14 @@ public class TrafficLightController
 				stateInfo[i][j] = -1;
 			}
 		}
-		
+
 		Event[] events = new Event[NUM_PED_LIGHTS * 3];
-		
+
 		int currentTime = 0;
 		for( int i = 0 ; i < state.length ; i++ ) {
 			//first part of the array will hold the index of the pedestrian light
 			//the second part of the array will hold the start state index in its first, the end state index in its second, and the state duration in its third
-			
+
 			//only looping though the pedestrian lights.
 			//I will get the traffic light by mult the index by multipliying by the index and adding 1 (1 for the straight traffic light)
 			for(int j = 0 ; j < pedestrianLight.length ; j ++){
@@ -810,7 +825,7 @@ public class TrafficLightController
 				TrafficLight.State tlState = state[i].getTrafficLightState(straightIndex);
 				switch(tlState) {
 				case GREEN:
-					
+
 					//get the state of the right hand traffic light of the opposite road.
 					//to get the traffic light on the opposite side we need to add 1 to get the rhs, then add 3, to get the opposite side, then mod 6 to wrap it arround
 					int oppRightIndex = ( (straightIndex + 1) + 3 ) % 6;
@@ -825,22 +840,26 @@ public class TrafficLightController
 							stateInfo[j][start] = currentTime;
 						}
 						break;
-				}
-				break;
+					default:
+						break;
+					}
+					break;
 
 				case YELLOW:
 					//we call the cut off point a yellow, giving the cars a few extra seconds than the pedestrians
 					//at this point we want to se the end state to this staet
-					
+
 					stateInfo[j][end] = currentTime + state[i].getStateDuration();
 					//we can add the increase j's duration by the state duration if we want the state to end exactly as the light turns red
+					break;
+				default:
 					break;
 				}
 
 			}
 			currentTime += state[i].getStateDuration();
 		}
-		
+
 		for( int i = 0 ; i < stateInfo.length ; i++){
 			int index = i*3;
 			//create the start event
@@ -849,13 +868,13 @@ public class TrafficLightController
 			events[index+1] = new PedestrianStateChangeEvent(stateInfo[i][end] - FLASHING_DELAY ,pedestrianLight[i],totalDuration());
 			//create stopped event
 			events[index+2] = new PedestrianStateChangeEvent(stateInfo[i][end] ,pedestrianLight[i],totalDuration());
-			
+
 		}
 
-		
+
 		return events;
 	}
-	
+
 	/**
 	 * The the x coordinate of a traffic light
 	 * @param tid The traffic light id that we are wanting to change
@@ -867,13 +886,13 @@ public class TrafficLightController
 		trafficLight[tid].setX(x);
 		trafficLight[tid].setY(y);
 	}
-	
+
 	public void setPedestrianLightCoords(int pid, int x[], int y[]) 
 	{
 		pedestrianLight[pid].setX(x);
 		pedestrianLight[pid].setY(y);
 	}
-	
+
 	/**
 	 * Add pedestiran lanes to a traffic light
 	 * @param road The road with the pedestrian lanes  on it
@@ -882,7 +901,7 @@ public class TrafficLightController
 	{
 		//get the lanes from the road
 		ArrayList<PedestrianLane> lanes = road.getPedestrianLanes();
-		
+
 		//if the lanes are on north tce the roads corresspon to light 0 or 1
 		//else they correspond to light 2 3
 		switch( road.getROAD()){
@@ -896,10 +915,10 @@ public class TrafficLightController
 				pedestrianLight[i/2 + 2].addPedestrianLane(lanes.get(i));
 			}
 			break;
-			
+
 		}
 	}
-	
+
 	/**
 	 * Add a box to a traffic light, the traffic light will tell the car whether to start or stop base on whether it is safe for the car tot turn
 	 * @param tid The traffic light to add the box to
@@ -919,7 +938,7 @@ public class TrafficLightController
 	{
 		return state[i];
 	}
-	
+
 	/**
 	 * Draw the traffic light defined by state s
 	 * @param i The index of the state to draw
@@ -1041,7 +1060,7 @@ public class TrafficLightController
 	public int changeStateDuration(int sid, int duration)
 	{
 		State state = this.state[sid];
-		
+
 		int minDuration = getMinDuration(state);
 		int maxDuration = getMaxDuration(state);
 		System.out.println("MIN: " + minDuration);
@@ -1065,7 +1084,7 @@ public class TrafficLightController
 		}
 		return state.getStateDuration();
 	}
-	
+
 	/** Get the maxium duration that this state can be
 	 * @param state The state to query
 	 * @return The maximum duration that the state can be
@@ -1073,71 +1092,73 @@ public class TrafficLightController
 	private int getMaxDuration(State state) 
 	{
 		switch ( state.getType()) {
-			case GREEN_RIGHT :
-			case GREEN :
-				return MAX_RIGHT_DURATION;
-			case YELLOW :
-				return MIN_YELLOW_DURATION;
-			case GREEN_OFF :
-				//this is where the values start to change
-				//if we are in sequence 1 or 4 -> max duration is max_straight - red delay
-				//sequence 2 -> max duration = max_straight - either the 3 states above or below
-				// how to work out if its above or below
-				//we want to check out the state below this one
-				//if the next state down is yellow, then we want to go up
-				//else if the next state down is green we want to go down
-				//this logic comes from how the states were
-				
-				//to work out what sequence we are in we need to get the north tce and frome rd sequence numbers
-				int northTce = sequence.getNorth();
-				int fromeRd = sequence.getFrome();
-				int firstStage = sequence.getSequenceLength(northTce);
-				//work out what state we are in
-				int seqNum;
-				int id = state.getId();
-				if( id < firstStage ) {
-					//we are in the first stage
-					seqNum = northTce;
+		case GREEN_RIGHT :
+		case GREEN :
+			return MAX_RIGHT_DURATION;
+		case YELLOW :
+			return MIN_YELLOW_DURATION;
+		case GREEN_OFF :
+			//this is where the values start to change
+			//if we are in sequence 1 or 4 -> max duration is max_straight - red delay
+			//sequence 2 -> max duration = max_straight - either the 3 states above or below
+			// how to work out if its above or below
+			//we want to check out the state below this one
+			//if the next state down is yellow, then we want to go up
+			//else if the next state down is green we want to go down
+			//this logic comes from how the states were
+
+			//to work out what sequence we are in we need to get the north tce and frome rd sequence numbers
+			int northTce = sequence.getNorth();
+			int fromeRd = sequence.getFrome();
+			int firstStage = sequence.getSequenceLength(northTce);
+			//work out what state we are in
+			int seqNum;
+			int id = state.getId();
+			if( id < firstStage ) {
+				//we are in the first stage
+				seqNum = northTce;
+			} else {
+				//else we are in the second stage
+				seqNum = fromeRd;
+			}
+
+			switch ( seqNum ) {
+			case 0 :
+				//$FALL_THROUGH$
+			case 3 : 
+				return MAX_STRAIGHT_DURATION - DEFAULT_RED_DELAY;
+			case 1 :
+				//$FALL_THROUGH$
+			case 2 :
+				boolean down;
+				State next = this.state[id+1];
+				if( next.getType() == State.Type.YELLOW ) {
+					//we want to search up
+					down = false;
 				} else {
-					//else we are in the second stage
-					seqNum = fromeRd;
+					down = true;
+					//we want to search down
 				}
-				
-				switch ( seqNum ) {
-				case 0 :
-					//$FALL_THROUGH$
-				case 3 : 
-					return MAX_STRAIGHT_DURATION - DEFAULT_RED_DELAY;
-				case 1 :
-					//$FALL_THROUGH$
-				case 2 :
-					boolean down;
-					State next = this.state[id+1];
-					if( next.getType() == State.Type.YELLOW ) {
-						//we want to search up
-						down = false;
-					} else {
-						down = true;
-						//we want to search down
-					}
-					//if we are in case 2 swap down and up
-					if( seqNum == 2 ) {
-						down = !down;
-					}
-					int difference = 0;
-					int count = 0;
-					//difference is the sum of the 3 state durations above/below the current one
-					while( count < 3 ) {
-						id --;
-						count ++;
-						//if we are going down, the last id is below the original state id
-						if( down && count == 3 ) {
-							id = id + 4;
-						}
-						difference += this.state[id].getStateDuration();
-					}
-					return MAX_STRAIGHT_DURATION - difference;
+				//if we are in case 2 swap down and up
+				if( seqNum == 2 ) {
+					down = !down;
 				}
+				int difference = 0;
+				int count = 0;
+				//difference is the sum of the 3 state durations above/below the current one
+				while( count < 3 ) {
+					id --;
+					count ++;
+					//if we are going down, the last id is below the original state id
+					if( down && count == 3 ) {
+						id = id + 4;
+					}
+					difference += this.state[id].getStateDuration();
+				}
+				return MAX_STRAIGHT_DURATION - difference;
+			}
+		default:
+			break;
 		}
 		System.err.println("ERROR: Failed to update traffic light table");
 		return -1;
@@ -1168,7 +1189,7 @@ public class TrafficLightController
 			//if the next state down is yellow, then we want to go up
 			//else if the next state down is green we want to go down
 			//this logic comes from how the states were
-			
+
 			//to work out what sequence we are in we need to get the north tce and frome rd sequence numbers
 			int northTce = sequence.getNorth();
 			int fromeRd = sequence.getFrome();
@@ -1183,7 +1204,7 @@ public class TrafficLightController
 				//else we are in the second stage
 				seqNum = fromeRd;
 			}
-			
+
 			switch ( seqNum ) {
 			case 0 :
 				//$FALL_THROUGH$
@@ -1220,14 +1241,16 @@ public class TrafficLightController
 				}
 				min =  MIN_STRAIGHT_DURATION - difference;
 			}
-		
-			
-			
+		default:
+			break;
+
+
+
 		}
 		if( min < MIN_STATE_DURATION ) {
 			min = MIN_STATE_DURATION;
 		}
-	return min;
+		return min;
 	}
 
 
@@ -1293,7 +1316,7 @@ public class TrafficLightController
 		}
 		saveDurations();
 	}
-	
+
 	/**
 	 * Save the settings of the traffic light controller to a csv
 	 * @param filename The name of the csv to save the file to
@@ -1310,7 +1333,7 @@ public class TrafficLightController
 			String write = "";
 			write += sequence.getNorth() + "," + sequence.getFrome();
 			pw.println(write);
-			
+
 			write = ntw_right + ",";
 			write += nte_right + ",";
 			write += ntw_straight + ",";
@@ -1323,7 +1346,7 @@ public class TrafficLightController
 			write += frs_straight + ",";
 			pw.println(write);
 			pw.close();
-			
+
 		} catch (IOException e) {
 			//TODO Let the user know that config was not saved
 			System.err.println("WARNING: Failed to save traffic light controller config");
@@ -1337,7 +1360,7 @@ public class TrafficLightController
 				//DONOTHING
 			}
 		}
-		
+
 	}
 	/** Save all the durations of the traffic light */
 	private void saveDurations() 
@@ -1349,7 +1372,7 @@ public class TrafficLightController
 		ntw_straight = trafficLight[1].getGreenDuration();
 		nte_straight = trafficLight[4].getGreenDuration();
 		nt_yellow = trafficLight[0].getYellowDuration();
-		
+
 		frn_right = trafficLight[8].getGreenDuration();
 		frs_right = trafficLight[11].getGreenDuration();
 		frn_straight = trafficLight[7].getGreenDuration();
@@ -1371,14 +1394,14 @@ public class TrafficLightController
 				s.setStateDuration(duration);
 				for( int i = 0 ; i < trafficLight.length ; i++ ) {
 					switch( s.getTrafficLightState(i) ) {
-						case RED:
-						case GREEN :
-						case OFF :
-							this.increaseDuration(trafficLight[i], s.getTrafficLightState(i), dif);
-							break;
-						case YELLOW :
-							this.increaseDuration(trafficLight[i], s.getTrafficLightState(i), duration);
-							break;
+					case RED:
+					case GREEN :
+					case OFF :
+						this.increaseDuration(trafficLight[i], s.getTrafficLightState(i), dif);
+						break;
+					case YELLOW :
+						this.increaseDuration(trafficLight[i], s.getTrafficLightState(i), duration);
+						break;
 					}
 				}
 

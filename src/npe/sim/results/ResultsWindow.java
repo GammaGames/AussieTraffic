@@ -5,6 +5,8 @@ import java.awt.event.ComponentListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.*;
+
+import npe.sim.SimProperties;
 import npe.sim.results.ResultsPanel.GraphType;
 
 /**
@@ -13,6 +15,10 @@ import npe.sim.results.ResultsPanel.GraphType;
 
 public class ResultsWindow extends JFrame implements ComponentListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2135369337104006694L;
 	///////////////////
 	//---VARIABLES---//
 	///////////////////

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import npe.sim.Sprite;
-import npe.sim.entity.Vehicle.Intention;
-import npe.sim.entity.Vehicle.State;
 import npe.sim.road.VehicleLane;
 import npe.sim.Utils;
 
@@ -72,6 +70,8 @@ public class Taxi extends Vehicle {
 					}
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}

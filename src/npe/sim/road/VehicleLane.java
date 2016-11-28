@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import npe.sim.entity.Entity;
 import npe.sim.entity.Vehicle;
 import npe.sim.entity.Vehicle.Intention;
-import npe.sim.entity.Vehicle.State;
 import npe.sim.results.StatsCollector;
 import npe.sim.entity.Bus;
 import npe.sim.Sprite;
@@ -132,6 +131,8 @@ public class VehicleLane extends Lane {
 				entryY = exitY;
 				exitY = temp;
 				break;
+		default:
+			break;
 		}
 		exitLanes = new ArrayList<VehicleLane>();
 	}

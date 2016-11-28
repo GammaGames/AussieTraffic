@@ -49,6 +49,8 @@ public class AddBusEvent extends AddEntityEvent {
 				} else {
 					intention = Intention.STRAIGHT;
 				}
+			default:
+				break;
 				
 			}
 			newBus = new Bus(vLane.getEntryX(), vLane.getEntryY(), vLane.dirDeg(), vLane, intention);

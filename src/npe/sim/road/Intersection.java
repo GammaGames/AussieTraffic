@@ -674,6 +674,8 @@ public class Intersection {
 				} else if ( dir == 180 ) {
 					vLanes.get(i).setBox(boxes[0]);					
 				}
+			default:
+				break;
 			}
 		}
 		
@@ -688,6 +690,8 @@ public class Intersection {
 				} else if ( dir == 270 ) {
 					vLanes.get(i).setBox(boxes[2]);					
 				}
+			default:
+				break;
 			}
 		}
 

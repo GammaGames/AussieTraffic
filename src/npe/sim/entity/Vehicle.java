@@ -70,7 +70,7 @@ public abstract class Vehicle extends Entity {
 	/**The maximum speed the Vehicle can travel at.*/
 	private double maxSpeed;
 	/** The speed at which a vehicle creeps at */
-	private double creepingSpeed = Utils.convertSpeed(20);
+	//private double creepingSpeed = Utils.convertSpeed(20);
 	
 	//The lanes associated with this Vehicle.
 	/**The lane that the vehicle enters the intersection in.*/
@@ -200,7 +200,7 @@ public abstract class Vehicle extends Entity {
 		//A vehicles start angle will be the same as the angle when it is created
 		startAngle = dirDeg();
 		
-		//Initialise turning variables based on this Vehicle's Intention
+		//Initialize turning variables based on this Vehicle's Intention
 		switch (intent) {
 		case LEFT:
 			//Exit lane is last element in exitLanes for lane
@@ -245,7 +245,7 @@ public abstract class Vehicle extends Entity {
 		//Set distance that vehicle leaves in front of it (0.5m to 1m)
 		buffer = Utils.random((int)(MAX_BUFFER - MIN_BUFFER)) + (int)MIN_BUFFER;
 		
-		//Initialise stopping point to the point at which it will stop if it were the only vehicle in the lane
+		//Initialize stopping point to the point at which it will stop if it were the only vehicle in the lane
 		stopX = lane.getExitX() - buffer*cosDir() - w()/2*cosDir();
 		stopY = lane.getExitY() - buffer*sinDir() - w()/2*sinDir();
 	}
@@ -289,6 +289,8 @@ public abstract class Vehicle extends Entity {
 						if( ifSafeChangeLanes(currentLane.getRightLane()) ){
 							changed = true;
 						}
+						break;
+					default:
 						break;
 					}
 					
@@ -579,6 +581,8 @@ public abstract class Vehicle extends Entity {
 					delayStart(intent);
 				}
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -713,6 +717,8 @@ public abstract class Vehicle extends Entity {
 				case STOPPED:
 					changeState(State.DRIVING);
 					break;
+				default:
+					break;
 				}
 			}
 		} else {
@@ -724,6 +730,8 @@ public abstract class Vehicle extends Entity {
 				if (NextVehicle != null) {
 					NextVehicle.stop(originalStopX, originalStopY, intent);
 				}
+				break;
+			default:
 				break;
 			}
 		}
@@ -856,7 +864,7 @@ public abstract class Vehicle extends Entity {
 	 */
 	public boolean changingLanes(double startX, double startY)
 	{
-		//Initialise variables used for changing lanes
+		//Initialize variables used for changing lanes
 		double xDir = startAngleCos;
 		double yDir = startAngleSin;
 		double midX = startX + VehicleLane.LANE_WIDTH*xDir;
@@ -940,6 +948,8 @@ public abstract class Vehicle extends Entity {
 				setDirection(startAngle);
 				return true;
 			}
+			break;
+		default:
 			break;
 		}
 		return false;
@@ -1175,6 +1185,7 @@ public abstract class Vehicle extends Entity {
 	/**Method determining if the vehicle is passed the point in the lane where it would stop at if it were the first vehicle
 	 * @return boolean
 	 */
+	@SuppressWarnings("unused")
 	private boolean passedFinalStop()
 	{
 		//Beginning at the exit point of the lane
@@ -1257,8 +1268,6 @@ public abstract class Vehicle extends Entity {
 		//if we get to the end of the loop return true
 		
 		Vehicle current = lane.getFirstVehicle();
-		//previous vehicle, used for appending the next vehicle into the lane, if it is safe
-		Vehicle prev = current;
 		boolean isSafe = true;
 		while ( current != null ) {
 			//using equals to as well here, because, yOffset or xOffset will = 0
@@ -1267,14 +1276,12 @@ public abstract class Vehicle extends Entity {
 			if( current.x() * xDir <= x2 * xDir && current.y() * yDir <= y2 * yDir ) {
 				//if we pass this statement, then we have passed the danger zone, so return true
 				isSafe = true;
-				prev = current;
 				break;
 			}
 			if( current.x() * xDir <= x1 * xDir && current.y() * yDir <= y1 * yDir ) {
 				isSafe = false;
 				break;
 			}
-			prev = current;
 			current = current.getNextVehicle();
 		}
 		
@@ -1294,7 +1301,6 @@ public abstract class Vehicle extends Entity {
 		}
 		
 		//if we get to a null vehicle, return true.
-		//if prev == null then we insert into the start of the list
 		//an attempt to change lanes
 		if( isSafe ) {
 			changeState(State.CHANGING);

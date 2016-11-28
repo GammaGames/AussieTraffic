@@ -12,6 +12,10 @@ import javax.swing.*;
 
 public class SequenceTab extends JPanel implements ActionListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7375814967057522211L;
 	///////////////////
 	//---CONSTANTS---//
 	///////////////////
@@ -33,8 +37,8 @@ public class SequenceTab extends JPanel implements ActionListener {
 	//GUI Components
 	private JLabel RoadL;
 	private JLabel SeqL;
-	private JComboBox selRoadC;
-	private JComboBox selSeqC;
+	private JComboBox<String> selRoadC;
+	private JComboBox<String> selSeqC;
 	private JLabel seqPic;
 	
 	//////////////////
@@ -57,7 +61,7 @@ public class SequenceTab extends JPanel implements ActionListener {
 		RoadL.setSize(ELEM_WIDTH,ELEM_HEIGHT);
 		this.add(RoadL);
 		//Select road combo box, select between frome rd and north tce
-		selRoadC = new JComboBox(ROADS);
+		selRoadC = new JComboBox<String>(ROADS);
 		selRoadC.setLocation(X_STRUT,Y_STRUT+ELEM_HEIGHT);
 		selRoadC.setSize(ELEM_WIDTH,ELEM_HEIGHT);
 		selRoadC.addActionListener(this);
@@ -69,7 +73,7 @@ public class SequenceTab extends JPanel implements ActionListener {
 		SeqL.setSize(ELEM_WIDTH,ELEM_HEIGHT);
 		this.add(SeqL);
 		//Select between preset traffic sequences
-		selSeqC = new JComboBox(SEQ_PRESETS);
+		selSeqC = new JComboBox<String>(SEQ_PRESETS);
 		selSeqC.setLocation(X_STRUT,4*Y_STRUT+3*ELEM_HEIGHT);
 		selSeqC.setSize(ELEM_WIDTH,ELEM_HEIGHT);
 		selSeqC.addActionListener(this);

@@ -14,6 +14,12 @@ import npe.sim.SimPanel;
 
 public class GeneralTab extends JPanel implements ActionListener, ChangeListener {
 	
+	/**
+	 * 
+	 */
+	
+	//added to remove warning on class.
+	private static final long serialVersionUID = 9173836510122184425L;
 	///////////////////
 	//---VARIABLES---//
 	///////////////////
@@ -24,9 +30,9 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	private JCheckBox bUSmode;
 	private JLabel lTime;
 	private JLabel lSpeed;
-	private JComboBox bTime;
+	private JComboBox<String> bTime;
 	private JSlider bSpeed;
-	private JCheckBox bAddLaneNorth;
+	private JCheckBox bAddLaneNorth; // see if I can change to a text box 
 	private JCheckBox bAddLaneFrome;
 	private JCheckBox bTaxiRank;
 	private JCheckBox bLeftOnly;
@@ -58,8 +64,8 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		add(lTime);
 		
 		//Time of day combo box
-		bTime = new JComboBox();
-		bTime.setModel(new DefaultComboBoxModel(new String[] {"Morning (8:30-9:30am)", "Afternoon (4:30-5:30pm)", "Night (7:30-8:30pm)"}));
+		bTime = new JComboBox<String>();
+		bTime.setModel(new DefaultComboBoxModel<String>(new String[] {"Morning (8:30-9:30am)", "Afternoon (4:30-5:30pm)", "Night (7:30-8:30pm)"}));
 		bTime.setBounds(10, 36, 225, 26);
 		bTime.addActionListener(this);
 		add(bTime);
@@ -94,7 +100,7 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		bAddLaneFrome.addChangeListener(this);
 		add(bAddLaneFrome);
 
-		//add taxi rank cehck box
+		//add taxi rank check box
 		bTaxiRank = new JCheckBox("Enable Taxi Rank");
 		bTaxiRank.setBounds(10, 230, 200, 30);
 		bTaxiRank.addChangeListener(this);

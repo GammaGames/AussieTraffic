@@ -16,7 +16,11 @@ import npe.sim.results.ResultsWindow;
 
 public class SimPanel extends JPanel implements Runnable {
 
-    ///////////////////
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5178286406282383132L;
+	///////////////////
     //---VARIABLES---//
     ///////////////////
     /**A Stats Collector lol*/

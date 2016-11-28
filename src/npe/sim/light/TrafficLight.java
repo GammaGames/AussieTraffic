@@ -40,12 +40,12 @@ public class TrafficLight
 		STRAIGHT,
 		RIGHT;
 	}
-	
+
 	/** The width of the light, used for drawing */
 	private final int LIGHT_WIDTH = 20;
 	/** The height of the light, used for drawing */
 	private final int LIGHT_HEIGHT = 20;
-	
+
 	/** The x position of the light, used for drawing */
 	private int x;
 	/** The y position of the light, used for drawing */
@@ -54,32 +54,32 @@ public class TrafficLight
 	private double direction;
 	/** The gif that will be drawn */
 	private String gif;
-	
+
 	/** The traffic light id */
 	private int id;
-	
+
 	/**The length of time the green light is on */
 	private int greenDuration;
 	/** The length of time the yellow light is on*/
 	private int yellowDuration;
 	/** The length of time the red light is on */
 	private int redDuration;
-	
+
 	/** The length of time the light is set to off */
 	private int offDuration;
 	/** The time of that a light has been on yellow for */
 	private int yellowT;
-	
+
 	/** The state that the traffic light is currently in */
 	private State state;
 	/** The direction of the traffic light */
 	public final Type TYPE;
 	/** An arraylist of boxes that will correspond to whether it is safe for a vehicle to turn */
 	private ArrayList<Box> boxes = new ArrayList<Box>(2);
-	
+
 	/** Arraylist of traffic lights */
 	private ArrayList<VehicleLane> lanes;
-	
+
 	/**
 	 * Create a traffic light
 	 * @param id The id of the traffic light
@@ -94,12 +94,12 @@ public class TrafficLight
 			direction = 90;
 			break;
 		case 1 : direction = -90;
-			break;
+		break;
 		case 2 : direction = 180;
-			break;
+		break;
 		case 3 : direction = 0;
 		}
-		
+
 		switch ( id % 3 ) {
 		case 0 :
 			gif = "Left.gif";
@@ -113,13 +113,13 @@ public class TrafficLight
 			gif = "Right.gif";
 			TYPE = Type.RIGHT;
 			break;
-			default:
-				System.err.println("ERROR: Invalid light id");
-				TYPE = Type.LEFT;
-				break;
+		default:
+			System.err.println("ERROR: Invalid light id");
+			TYPE = Type.LEFT;
+			break;
 		}
 	}
-	
+
 	/**
 	 * Add time to green duration
 	 * @param duration Time to add
@@ -182,7 +182,7 @@ public class TrafficLight
 	{
 		return offDuration;
 	}
-	
+
 	/** 
 	 * Get the id of the traffic light
 	 * @return id
@@ -191,7 +191,7 @@ public class TrafficLight
 	{
 		return id;
 	}
-	
+
 	/**
 	 * @param greenDuration the greenDuration to set
 	 */
@@ -223,7 +223,7 @@ public class TrafficLight
 	{
 		this.offDuration = offDuration;
 	}
-	
+
 	/**
 	 * Method used to change the state of a traffic light
 	 * @param state The new state of the traffic light
@@ -242,7 +242,7 @@ public class TrafficLight
 	{
 		return state;
 	}
-	
+
 	/**
 	 * To string method: 
 	 * @return The ide of the traffic light and the current state it is in
@@ -264,10 +264,10 @@ public class TrafficLight
 		retString += "Green Duration: " + greenDuration + "\n";
 		retString += "Yellow Duration: " + yellowDuration + "\n";
 		retString += "Red Duration: " + redDuration + "\n";
-		
+
 		return retString;
 	}
-	
+
 	/**
 	 * Add a lane that this traffic light will tell to stop
 	 * @param lane The lane that will be added to the traffic light
@@ -290,8 +290,8 @@ public class TrafficLight
 		switch ( state ) {
 		case OFF :
 			if( !isSafe()){
-				 callStop();
-				 break;
+				callStop();
+				break;
 			} else {
 				callStart();
 				break;
@@ -307,8 +307,8 @@ public class TrafficLight
 				if( yellowT  < Utils.convertTime(yellowDuration) - SimPanel.TPS ) {
 					//System.out.println(yellowDuration);
 					if( !isSafe()){
-						 callStop();
-						 break;
+						callStop();
+						break;
 					} else {
 						callStart();
 						break;
@@ -316,17 +316,17 @@ public class TrafficLight
 				} else { 
 					callStart();
 				}
-			//if its a left traffic light
-			//only go if it is safe to go
+				//if its a left traffic light
+				//only go if it is safe to go
 			} else if ( id % 3 == 0 ) {
 				if( !isSafe()){
-					 callStop();
-					 break;
+					callStop();
+					break;
 				} else {
 					callStart();
 					break;
 				}
-			//if it is a straight light, tell it to start for the first second, stop afterwards
+				//if it is a straight light, tell it to start for the first second, stop afterwards
 			} else {
 				if( yellowT < SimPanel.TPS ) {
 					callStart();
@@ -341,7 +341,7 @@ public class TrafficLight
 		}
 		yellowT++;
 	}
-	
+
 	/**
 	 * Draws the traffic lights
 	 * @params Graphs2D g
@@ -365,7 +365,7 @@ public class TrafficLight
 		redDuration = 0;
 		offDuration = 0;
 	}
-	
+
 	/**
 	 * Setter method for the x coordinate of the traffic light
 	 * @param x The new x coordinate of the traffic light
@@ -374,7 +374,7 @@ public class TrafficLight
 	{
 		this.x = x;
 	}
-	
+
 	/**
 	 *  Setter method for the y coordinate of the traffic light
 	 * @param y The new y coordinate of the traffic light
@@ -392,7 +392,7 @@ public class TrafficLight
 	{
 		boxes.add(box);
 	}
-	
+
 	/**
 	 * Method to determine if it is safe for a car to turn right/left with care
 	 * @return True if it is good to go
@@ -434,6 +434,8 @@ public class TrafficLight
 			case RIGHT :
 				lane.stop(Intention.RIGHT);
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -462,6 +464,8 @@ public class TrafficLight
 				break;
 			case RIGHT :
 				lane.start(Intention.RIGHT);
+				break;
+			default:
 				break;
 			}
 		}

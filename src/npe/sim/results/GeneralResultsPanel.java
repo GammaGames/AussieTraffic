@@ -10,6 +10,10 @@ import npe.sim.SimProperties;
 
 public class GeneralResultsPanel extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2088946027213328135L;
 	///////////////////
 	//---CONSTANTS---//
 	///////////////////
