@@ -15,7 +15,7 @@ import npe.sim.results.ResultsWindow;
  */
 
 public class SimPanel extends JPanel implements Runnable {
-	
+
 	///////////////////
 	//---VARIABLES---//
 	///////////////////
@@ -45,7 +45,7 @@ public class SimPanel extends JPanel implements Runnable {
 	private long fps = 0;
 	/**The duration of the simulation, in ticks.*/
 	private long duration = 0;
-	
+
 	////////////////////////
 	//---VIEW VARIABLES---//
 	////////////////////////
@@ -69,7 +69,7 @@ public class SimPanel extends JPanel implements Runnable {
 	private double sy = 1.0;
 	/**The x-coordinate of the centre of the panel.*/
 	private double centreX = SP_WIDTH/2;
-	/**The x-coordinate of the centre of the panel.*/
+	/**The y-coordinate of the centre of the panel.*/
 	private double centreY = SP_HEIGHT/2;
 	/**The minimum allowed scaling factor.*/
 	private static final double MIN_SCALE = 0.07;
@@ -78,8 +78,8 @@ public class SimPanel extends JPanel implements Runnable {
 	//button controll
 	/**The state of the left mouse button.*/
 	private static boolean leftButtonPressed = false;
-	
-	
+
+
 	//////////////////
 	//---CREATION---//
 	//////////////////
@@ -92,7 +92,7 @@ public class SimPanel extends JPanel implements Runnable {
 			{	
 				//if the left button is pressed dont do anything. 
 				if(leftButtonPressed) return;
-				
+
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					e.getComponent().setCursor(new Cursor(Cursor.MOVE_CURSOR));
 					//Get the starting position of the mouse
@@ -100,14 +100,20 @@ public class SimPanel extends JPanel implements Runnable {
 					startY = e.getY();
 					//signal that the left mouse button is pressed
 					leftButtonPressed = true;
-					
+
 				} else if (e.getButton() == MouseEvent.BUTTON3) {
 					//Centre the screen
 					tx = 0;
 					ty = 0;
 					prevX = 0;
 					prevY = 0;
-					sx = 1.0;
+					if (Utils.getUSmode())
+					{
+						sx = -1.0;
+					}
+					else {
+						sx = 1.0;
+					}
 					sy = 1.0;
 					repaint();
 				}
@@ -124,7 +130,7 @@ public class SimPanel extends JPanel implements Runnable {
 				}
 			}
 		});
-		
+
 		addMouseMotionListener(new MouseMotionAdapter()
 		{
 			public void mouseDragged(MouseEvent e)
@@ -144,9 +150,19 @@ public class SimPanel extends JPanel implements Runnable {
 			public void mouseWheelMoved(MouseWheelEvent e)
 			{
 				//Calculate amount by which to scale
-				if (sx > MIN_SCALE || (sx <= MIN_SCALE && e.getWheelRotation()*SCALE_AMOUNT < 0)) {
-					sx -= e.getWheelRotation()*SCALE_AMOUNT;
+
+
+				if( Utils.getUSmode() == false) {
+					if (sx > MIN_SCALE || (sx <= MIN_SCALE && e.getWheelRotation()*SCALE_AMOUNT < 0)) {
+						sx -= e.getWheelRotation()*SCALE_AMOUNT;
+					}
 				}
+				else {
+					if (-sx > MIN_SCALE || (-sx <= MIN_SCALE && e.getWheelRotation()*SCALE_AMOUNT < 0)) {
+						sx += e.getWheelRotation()*SCALE_AMOUNT;
+					}
+				}
+
 				if (sy > MIN_SCALE || (sy <= MIN_SCALE && e.getWheelRotation()*SCALE_AMOUNT < 0)) {
 					sy -= e.getWheelRotation()*SCALE_AMOUNT;
 				}
@@ -159,7 +175,7 @@ public class SimPanel extends JPanel implements Runnable {
 		this.simWindow = sw;
 		simProperties = sp;
 	}
-	
+
 	//////////////
 	//---LOOP---//
 	//////////////
@@ -169,7 +185,6 @@ public class SimPanel extends JPanel implements Runnable {
 		//---SET UP SIMULATION---//
 		statsCollector = new StatsCollector();
 		simController = new SimController(simProperties, statsCollector);
-		
 		//---START MAIN LOOP---//
 		long prevTime = time(); //Time of previous frame
 		long framesSinceFpsCheck = 0; //Number of frames since last frame count
@@ -208,6 +223,21 @@ public class SimPanel extends JPanel implements Runnable {
 			prevTime = time();
 		}
 	}
+
+	/**Redraws the panel and changes way everything is drawn.
+	 * currently breaks debugging unfortunately.
+	 * @return none.
+	 */
+	public void USmode () {
+		if (Utils.getUSmode() == false) {
+			sx = Math.abs(sx);
+		}
+		else {
+			sx = Math.abs(sx)*-1;
+		}
+		return;
+	}
+
 	/**Gets a precise measurement of time which can be used to find durations.
 	 * @return Time in milliseconds.
 	 */
@@ -222,7 +252,7 @@ public class SimPanel extends JPanel implements Runnable {
 	{
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D)g;
-		
+
 		//Draw the simulation
 		//Scale by the centre of the screen
 		g2d.translate(centreX, centreY);
@@ -230,25 +260,25 @@ public class SimPanel extends JPanel implements Runnable {
 		g2d.translate(-centreX, -centreY);
 		//Translate by amount mouse has been dragged
 		g2d.translate(tx/sx, ty/sy);
-		
+
 		simController.draw(g2d);
-		
+
 		//Reverse transforms so text is drawn normally
 		g2d.translate(-tx/sx, -ty/sy);
 		g2d.translate(centreX, centreY);
 		g2d.scale(1/sx, 1/sy);
 		g2d.translate(-centreX, -centreY);
-		
+
 		//Draw FPS
 		int labelY = 0;
 		g2d.setColor(new Color(0x44,0xCC,0xFF));
 		g.setFont(new Font ("Arial", Font.BOLD, 12));
-		
+
 		//Draw FPS
 		if(Utils.FPSDrawing){
 			g2d.drawString("FPS: "+fps, 16, labelY+=16);
 		}
-		
+
 		//Draw time left / time simulated
 		if (simProperties.duration > 0) {
 			long seconds = ( duration - simController.t() ) / TPS;
@@ -263,13 +293,13 @@ public class SimPanel extends JPanel implements Runnable {
 			String simTime = minutes + ":" + secondsString;
 			g2d.drawString("Time simulated (mm:ss): "+ simTime, 16, labelY+=16);
 		}
-		
+
 		//Draw seed
 		if(Utils.seedDrawing){
 			g2d.drawString("Seed: "+Utils.getSeed(), 16, labelY+=16);
 		}
 	}
-	
+
 	/////////////////
 	//---CONTROL---//
 	/////////////////
@@ -311,5 +341,5 @@ public class SimPanel extends JPanel implements Runnable {
 	{
 		simController.tick();
 	}
-	
+
 }

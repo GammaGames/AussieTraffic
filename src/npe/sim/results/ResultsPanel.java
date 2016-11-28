@@ -8,6 +8,7 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.*;
+import npe.sim.Utils;
 
 /**
  * Displays a graph of results based on a particular graph type.
@@ -61,7 +62,9 @@ public class ResultsPanel extends JPanel {
 	private int legendSlotY4 = 0;
 	private int legendSlotX = 0;
 	JTextArea des = new JTextArea("Insert simulation options here", 10, 150);
-	
+	//Variable names for switching east and west.
+	private String west = "West";
+	private String east = "East";
 	
 	//////////////////
 	//---CREATION---//
@@ -69,6 +72,10 @@ public class ResultsPanel extends JPanel {
 	/**Creates a new ResultTab.*/
 	public ResultsPanel(StatsCollector st, GraphType g)
 	{
+	    if (Utils.getUSmode() == true) {
+	        west = "East";
+	        east = "West";
+	    }
 		statsCollector = st;
 		graph = g;
 		getPoints();
@@ -239,12 +246,12 @@ public class ResultsPanel extends JPanel {
 		g.setColor(C3);
 		dot = new Rectangle2D.Double(legendSlotX - 21, legendSlotY3 - 12, 15, 15);
 		g.fill(dot);
-		g.drawString("North Terrace from East", legendSlotX, legendSlotY3);
+		g.drawString(String.format("North Terrace from %s", east), legendSlotX, legendSlotY4);
 		
 		g.setColor(C4);
 		dot = new Rectangle2D.Double(legendSlotX - 21, legendSlotY4 - 12, 15, 15);
 		g.fill(dot);
-		g.drawString("North Terrace from West", legendSlotX, legendSlotY4);
+		g.drawString(String.format("North Terrace from %s", west), legendSlotX, legendSlotY3);
 	}
 	/**Draws the scale on the graph.
 	 * @param g Graphics context to draw on.
