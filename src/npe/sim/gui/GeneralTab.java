@@ -33,8 +33,10 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 	private JLabel lSpeed;
 	private JComboBox<String> bTime;
 	private JSlider bSpeed;
-	private JCheckBox bAddLaneNorth; // see if I can change to a text box 
-	private JCheckBox bAddLaneFrome;
+	private JLabel lAddLaneNorth;
+	private JComboBox<String> bAddLaneNorth; // see if I can change to a text box
+	private JLabel lAddLaneFrome;
+	private JComboBox<String> bAddLaneFrome;
 	private JCheckBox bTaxiRank;
 	private JCheckBox bLeftOnly;
 	
@@ -54,10 +56,10 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		//---ADD ELEMENTS TO PANEL---//
 				
 		//Add USmode check box
-        	bUSmode = new JCheckBox("US mode");
-        	bUSmode.setBounds(150, 11, 100, 14);
-        	bUSmode.addChangeListener(this);
-        	add(bUSmode);
+		bUSmode = new JCheckBox("US mode");
+		bUSmode.setBounds(150, 11, 100, 14);
+		bUSmode.addChangeListener(this);
+		add(bUSmode);
 		
 		//Time of day label
 		lTime = new JLabel("Time of Day:");
@@ -88,28 +90,41 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		bSpeed.setBounds(10, 97, 225, 49);
 		bSpeed.addChangeListener(this);
 		add(bSpeed);	
-		
-		//Add Lane North/South check box
-		bAddLaneNorth = new JCheckBox("Add lane to West/East");
-		bAddLaneNorth.setBounds(10, 170, 200, 30);
-		bAddLaneNorth.addChangeListener(this);
-		add(bAddLaneNorth);
 
-		//Add Lane Frome rd check box
-		bAddLaneFrome = new JCheckBox("Add lane to North/South");
-		bAddLaneFrome.setBounds(10, 200, 200, 30);
-		bAddLaneFrome.addChangeListener(this);
+		//Add Lane West/East Label for lane Numbers
+		lAddLaneNorth = new JLabel("Add lane to West/East");
+		lAddLaneNorth.setBounds(10, 170, 200, 30);
+		add(lAddLaneNorth);
+		
+		//Add Lane West/East text field for lane numbers
+		bAddLaneNorth = new JComboBox<String>();
+		bAddLaneNorth.setModel(new DefaultComboBoxModel<String>(new String[] {"4", "5", "6", "7", "8"}));
+		bAddLaneNorth.setBounds(10, 200, 200, 30);
+		bAddLaneNorth.addActionListener(this);
+		add(bAddLaneNorth);
+		
+		//Add Lane North/South Label for lane Numbers
+		lAddLaneFrome = new JLabel("Add lane to North/South");
+		lAddLaneFrome.setBounds(10, 230, 200, 30);
+		//bAddLaneNorth.addChangeListener(this);
+		add(lAddLaneFrome);
+
+		//Add Lane Frome rd text field for lane numbers
+		bAddLaneFrome = new JComboBox<String>();
+		bAddLaneFrome.setModel(new DefaultComboBoxModel<String>(new String[] {"3", "4", "5", "6", "7", "8"}));
+		bAddLaneFrome.setBounds(10, 260, 200, 30);
+		bAddLaneFrome.addActionListener(this);
 		add(bAddLaneFrome);
 
 		//add taxi rank check box
 		bTaxiRank = new JCheckBox("Enable Taxi Rank");
-		bTaxiRank.setBounds(10, 230, 200, 30);
+		bTaxiRank.setBounds(10, 290, 200, 30);
 		bTaxiRank.addChangeListener(this);
 		add(bTaxiRank);
 		
 		//add left only lane check box
 		bLeftOnly = new JCheckBox("Left only lanes");
-		bLeftOnly.setBounds(10, 260, 200, 30);
+		bLeftOnly.setBounds(10, 320, 200, 30);
 		bLeftOnly.addChangeListener(this);
 		add(bLeftOnly);
 		
@@ -124,6 +139,12 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		Object src = e.getSource();
 		if (src == bTime) {
 			sp.timeOfDay = bTime.getSelectedIndex();
+		}
+		else if (src == bAddLaneNorth){
+			sp.numLanesNorth = Integer.parseInt(bAddLaneNorth.getItemAt(bAddLaneNorth.getSelectedIndex()));
+		}
+		else if (src == bAddLaneFrome){
+			sp.numLanesFrome = Integer.parseInt(bAddLaneFrome.getItemAt(bAddLaneFrome.getSelectedIndex()));
 		}
 	}
 	/**Performs actions when a slider or spinner or any check box is changed.*/
@@ -163,21 +184,21 @@ public class GeneralTab extends JPanel implements ActionListener, ChangeListener
 		    pSim.USmode();
 		}
 		
-		if (src == bAddLaneNorth) {
+		/*if (src == bAddLaneNorth) {
 			if(bAddLaneNorth.isSelected()){
 				sp.numLanesNorthExtra = 1;
 				} else if(!bAddLaneNorth.isSelected()){
 				sp.numLanesNorthExtra = 0;
 			}
-		}
+		}*/
 		
-		if (src == bAddLaneFrome) {
+		/*if (src == bAddLaneFrome) {
 			if(bAddLaneFrome.isSelected()){
 				sp.numLanesFromeExtra = 1;
 			} else if(!bAddLaneFrome.isSelected()){
 				sp.numLanesFromeExtra = 0;
 			}
-		}
+		}*/
 		
 		if (src == bTaxiRank) {
 			sp.taxiRank = bTaxiRank.isSelected();

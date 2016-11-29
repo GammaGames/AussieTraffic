@@ -5,10 +5,7 @@ import java.awt.event.ComponentListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.*;
-
-import npe.sim.SimProperties;
 import npe.sim.results.ResultsPanel.GraphType;
-import npe.sim.SimProperties;
 
 /**
  * A window which contains the results collected from a single simulation.
