@@ -10,6 +10,10 @@ import npe.sim.gui.*;
 
 public class SimWindow extends JFrame {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7149966715160670757L;
 	///////////////////
 	//---CONSTANTS---//
 	///////////////////

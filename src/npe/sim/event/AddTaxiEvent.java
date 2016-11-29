@@ -29,6 +29,8 @@ public class AddTaxiEvent extends AddEntityEvent {
 					intention = Intention.LEFT;
 				}
 				break;
+			default:
+				break;
 			}
 			newTaxi = new Taxi(vLane.getEntryX(), vLane.getEntryY(), vLane.dirDeg(), vLane, intention);
 

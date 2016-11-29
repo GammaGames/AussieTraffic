@@ -6,7 +6,6 @@ import npe.sim.Utils;
 import npe.sim.entity.Taxi;
 import npe.sim.entity.Vehicle;
 import npe.sim.entity.Vehicle.State;
-import npe.sim.entity.Vehicle.Intention;
 
 /**
  * An object representing the Taxi Rank on the eastern side of North Terrace

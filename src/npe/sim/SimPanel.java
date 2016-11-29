@@ -16,35 +16,39 @@ import npe.sim.results.ResultsWindow;
 
 public class SimPanel extends JPanel implements Runnable {
 
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5178286406282383132L;
 	///////////////////
-	//---VARIABLES---//
-	///////////////////
-	/**A Stats Collector lol*/
-	private StatsCollector statsCollector = new StatsCollector();
-	/**The simulation properties which will be used for the simulation.*/
-	private SimProperties simProperties = new SimProperties();
-	/**The simulation controller being driven by this panel.*/
-	private SimController simController = new SimController(simProperties, statsCollector);
-	/**The simulation window which contains this panel.*/
-	private SimWindow simWindow;
-	//Dimensions
-	/**Width of the SimPanel.*/
-	public static final int SP_WIDTH = 774;
-	/**Height of the SimPanel.*/
-	public static final int SP_HEIGHT = 600;
-	//LOOP CONTROL
-	/**Whether or not the main loop is currently running.*/
-	private boolean running = false;
-	/**Whether or not the simulation is currently paused.*/
-	private boolean paused = false;
-	/**The number of Ticks Per Second for "normal" simulation speed.*/
-	public static final int TPS = 30;
-	/**Simulation speed multiplier. Target FPS = TPS * speed.*/
-	private double speed = 1;
-	/**The current animation speed in Frames Per Second.*/
-	private long fps = 0;
-	/**The duration of the simulation, in ticks.*/
-	private long duration = 0;
+    //---VARIABLES---//
+    ///////////////////
+    /**A Stats Collector lol*/
+    private StatsCollector statsCollector = new StatsCollector();
+    /**The simulation properties which will be used for the simulation.*/
+    private SimProperties simProperties = new SimProperties();
+    /**The simulation controller being driven by this panel.*/
+    private SimController simController = new SimController(simProperties, statsCollector);
+    /**The simulation window which contains this panel.*/
+    private SimWindow simWindow;
+    //Dimensions
+    /**Width of the SimPanel.*/
+    public static final int SP_WIDTH = 774;
+    /**Height of the SimPanel.*/
+    public static final int SP_HEIGHT = 600;
+    //LOOP CONTROL
+    /**Whether or not the main loop is currently running.*/
+    private boolean running = false;
+    /**Whether or not the simulation is currently paused.*/
+    private boolean paused = false;
+    /**The number of Ticks Per Second for "normal" simulation speed.*/
+    public static final int TPS = 30;
+    /**Simulation speed multiplier. Target FPS = TPS * speed.*/
+    private double speed = 1;
+    /**The current animation speed in Frames Per Second.*/
+    private long fps = 0;
+    /**The duration of the simulation, in ticks.*/
+    private long duration = 0;
 
 	////////////////////////
 	//---VIEW VARIABLES---//

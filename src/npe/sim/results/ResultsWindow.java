@@ -6,7 +6,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.*;
 import npe.sim.results.ResultsPanel.GraphType;
-import npe.sim.SimProperties;
 
 /**
  * A window which contains the results collected from a single simulation.
@@ -14,6 +13,10 @@ import npe.sim.SimProperties;
 
 public class ResultsWindow extends JFrame implements ComponentListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2135369337104006694L;
 	///////////////////
 	//---VARIABLES---//
 	///////////////////

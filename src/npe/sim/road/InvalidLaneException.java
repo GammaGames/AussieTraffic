@@ -20,6 +20,11 @@ package npe.sim.road;
 public class InvalidLaneException extends Exception
 {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7881835734113316208L;
+
+	/**
 	 * Constructs an InvalidLaneException with null as its error message string.
 	 */
 	public InvalidLaneException()

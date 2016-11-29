@@ -21,6 +21,10 @@ import npe.sim.light.TrafficLightController;
 
 public class TrafficLightTab extends JPanel implements ActionListener, ChangeListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3769294822806351415L;
 	///////////////////
 	//---CONSTANTS---//
 	///////////////////
@@ -52,7 +56,7 @@ public class TrafficLightTab extends JPanel implements ActionListener, ChangeLis
 	private SimProperties simProperties;
 	private SimWindow simWindow;
 	private TrafficLightController trafficLightController;
-	private JComboBox selectTrafficLightCB;
+	private JComboBox<String> selectTrafficLightCB;
 	//Duration Labels
 	private JLabel greenDurationL;
 	private JLabel yellowDurationL;
@@ -86,8 +90,8 @@ public class TrafficLightTab extends JPanel implements ActionListener, ChangeLis
 	
 		newTrafficLightController();
 		
-		selectTrafficLightCB = new JComboBox(TRAFFIC_LIGHT);
-		ListCellRenderer rend = new DefaultListCellRenderer();
+		selectTrafficLightCB = new JComboBox<String>(TRAFFIC_LIGHT);
+		ListCellRenderer<Object> rend = new DefaultListCellRenderer();
 		((JLabel)rend).setHorizontalAlignment(SwingConstants.CENTER);
 		selectTrafficLightCB.setRenderer(rend);
 		selectTrafficLightCB.addActionListener(this);
@@ -114,10 +118,10 @@ public class TrafficLightTab extends JPanel implements ActionListener, ChangeLis
 		yellowDurationS.addChangeListener(this);
 		
 
-		//Initialise Traffic light Panel
+		//Initialize Traffic light Panel
 		this.setLayout(null);
 		
-		int yaxis = 10; //used to determin the yaxis to avoid hardcoding
+		int yaxis = 10; //used to determine the yaxis to avoid hard coding
 		int height = 20;
 		
 		

@@ -16,27 +16,30 @@ import npe.sim.road.VehicleLane;
 public class Interval {
 	/** The minimum a mount of entities for the interval */
 	private int minEntities;
-	/** The maximum amount of entities for the itnerval */
+	/** The maximum amount of entities for the interval */
 	private int maxEntities;
 	/** The duration of the interval in ticks*/
 	private long minTime;
-	/** The max time between entitites in ticks */
+	/** The max time between entities in ticks */
 	private long maxTime;
 	/** The chance that it will be a bus */
 	private double busChance;
 	/** The chance that an entity will be a bus */
+	@SuppressWarnings("unused")
 	private double carChance;
 	/** The chance that a car will be turning left */
 	private double carLeftChance;
 	/** The chance that a car will be going straight */
 	private double carStraightChance;
 	/** The chance that a car will be turning right */
+	@SuppressWarnings("unused")
 	private double carRightChance;
 	/** The chance that a bus will be turning left */
 	private double busLeftChance;
 	/** The chance that a bus will be going straight */
 	private double busStraightChance;
 	/** The chance that a bus will be turning right */
+	@SuppressWarnings("unused")
 	private double busRightChance;
 	/** The Straight lanes that the interval affects */
 	private ArrayList<Lane> straightLanes = new ArrayList<Lane>(3);

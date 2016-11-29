@@ -82,6 +82,8 @@ public class AddCarEvent extends AddEntityEvent
 					intention = Intention.STRAIGHT;
 				}
 				break;
+			default:
+				break;
 				
 			}
 			//check to see wheter to crate a taxi or a car

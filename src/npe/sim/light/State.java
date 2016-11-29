@@ -63,6 +63,8 @@ public class State {
 				case RED : 
 					type = Type.GREEN;
 					break;
+				default:
+					break;
 				} 
 				if ( (i % 3) == 2 ) {
 					type = Type.GREEN_RIGHT;
@@ -75,6 +77,8 @@ public class State {
 				
 			case OFF : 
 				type = Type.GREEN_OFF;
+				break;
+			default:
 				break;
 			}
 		}

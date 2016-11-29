@@ -25,6 +25,10 @@ import npe.sim.Utils;
 
 public class BottomPanel extends JPanel implements ActionListener, ChangeListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6338859583766690283L;
 	///////////////////
 	//---VARIABLES---//
 	///////////////////

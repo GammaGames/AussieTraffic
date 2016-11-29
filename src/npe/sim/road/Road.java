@@ -2,7 +2,6 @@ package npe.sim.road;
 import java.awt.*;
 import java.util.*;
 import java.awt.geom.*;
-import npe.sim.entity.Vehicle.Intention;
 
 /**
  *
@@ -48,8 +47,6 @@ public class Road {
 	//width gives the current width in regards to the number of lanes currently in the road
 	private double width = 0;
 	private double length = 0;
-	private int numLanes = 0;
-
 	private PedestrianLane left;
 	private PedestrianLane right;
 	private PedestrianLane botRight;
@@ -65,7 +62,7 @@ public class Road {
 	private Stroke drawingStroke = new BasicStroke(4, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
 	private Stroke dashedStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 0, new float[]{9}, 0);
 
-	private int test = 1;
+	
 
 	//Road signs
 	//	 Sprite northTceRoadSign = new Sprite("/north_tce/roadSign.gif");
@@ -75,8 +72,6 @@ public class Road {
 	{
 		ROAD = roadType;
 		this.intersection = intersection;
-		this.numLanes = numLanes;
-		
 		this.speedLimit = speedLimit;
 
 		roadWidth = numLanes*VehicleLane.LANE_WIDTH;
@@ -274,47 +269,6 @@ public class Road {
 		for (PedestrianLane p : pLanes) {
 			p.tick();
 		}
-
-		/*
-		for(VehicleLane l : vLanes) {
-			
-			//Add a car every 4 - 10 seconds
-			if (test % ((generator.nextInt(7) + 4)*30) == 0) {
-				switch(l.getType()){ 
-					case LEFT : l.addCar(Intention.LEFT); break;
-					case LEFT_STRAIGHT : 
-						int chance = generator.nextInt(2);
-						l.addCar(Intention.LEFT); 
-						/*
-						if (chance == 0) {
-							l.addCar(Intention.LEFT); 
-						} else {
-							l.addCar(Intention.STRAIGHT); 
-						}
-						
-						break;
-					case STRAIGHT : 
-						double busChance = generator.nextDouble();
-						if (busChance < 0.02) {
-							l.addBus(Intention.STRAIGHT);
-						} else {
-							l.addCar(Intention.STRAIGHT);
-						} 
-						break;
-					case RIGHT_STRAIGHT : l.addCar(Intention.RIGHT); break;
-					case RIGHT : l.addCar(Intention.RIGHT);
-						break;
-				}
-				
-			}
-		}
-		for (PedestrianLane p : pLanes) {
-			if (test % ((generator.nextInt(7) + 4)*120) == 0) {
-				p.addPedestrian();
-			}
-		}
-		*/
-		test++;
 	}
 	
 	/**
